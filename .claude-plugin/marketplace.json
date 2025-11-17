@@ -136,6 +136,51 @@
         "cloud"
       ],
       "source": "./plugins/infra-plugin"
+    },
+    {
+      "name": "aiagent-plugin",
+      "version": "2.0.0",
+      "description": "AI agent orchestration for Claude, LangChain 1.0, LangGraph 1.0, Microsoft Agent Framework",
+      "author": {
+        "name": "Claude Code Team"
+      },
+      "license": "MIT",
+      "category": "ai",
+      "keywords": [
+        "ai-agents",
+        "claude",
+        "langchain",
+        "langgraph",
+        "microsoft-agent-framework",
+        "orchestration",
+        "workflow",
+        "automation",
+        "multi-agent"
+      ],
+      "source": "./plugins/ai-agents-plugin"
+    },
+    {
+      "name": "llm-plugin",
+      "version": "1.0.0",
+      "description": "Comprehensive LLM toolkit for training, fine-tuning, and deployment",
+      "author": {
+        "name": "Claude Code Team"
+      },
+      "license": "MIT",
+      "category": "ai",
+      "keywords": [
+        "llm",
+        "pytorch",
+        "huggingface",
+        "transformers",
+        "training",
+        "finetuning",
+        "lora",
+        "qlora",
+        "rlhf",
+        "dpo"
+      ],
+      "source": "./plugins/llm-plugin"
     }
   ]
 }

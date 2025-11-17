@@ -1,44 +1,14 @@
 {
   "mcpServers": {
-    "gcp-docs": {
-      "command": "uvx",
-      "args": ["mcp-server-fetch"],
-      "env": {
-        "ALLOWED_DOMAINS": "cloud.google.com,docs.cloud.google.com"
-      },
-      "description": "Google Cloud Platform documentation for infrastructure guidance"
+    "docs-index": {
+      "command": "python",
+      "args": ["../../mcp-servers/docs-index/server.py"],
+      "description": "Curated documentation index for infrastructure topics"
     },
-    "kubernetes-docs": {
+    "fetch": {
       "command": "uvx",
       "args": ["mcp-server-fetch"],
-      "env": {
-        "ALLOWED_DOMAINS": "kubernetes.io"
-      },
-      "description": "Kubernetes official documentation for deployment best practices"
-    },
-    "docker-docs": {
-      "command": "uvx",
-      "args": ["mcp-server-fetch"],
-      "env": {
-        "ALLOWED_DOMAINS": "docs.docker.com"
-      },
-      "description": "Docker documentation for containerization guidance"
-    },
-    "terraform-docs": {
-      "command": "uvx",
-      "args": ["mcp-server-fetch"],
-      "env": {
-        "ALLOWED_DOMAINS": "terraform.io,www.terraform.io,registry.terraform.io"
-      },
-      "description": "Terraform and provider registry documentation for IaC"
-    },
-    "helm-docs": {
-      "command": "uvx",
-      "args": ["mcp-server-fetch"],
-      "env": {
-        "ALLOWED_DOMAINS": "helm.sh"
-      },
-      "description": "Helm package manager documentation for chart development"
+      "description": "Web fetching for documentation URLs from docs-index"
     },
     "gcloud": {
       "command": "npx",

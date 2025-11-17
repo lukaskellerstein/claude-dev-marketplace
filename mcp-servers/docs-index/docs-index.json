@@ -1,0 +1,572 @@
+{
+  "frontend": {
+    "javascript": [
+      {
+        "id": "mdn-js",
+        "name": "JavaScript - MDN",
+        "description": "Comprehensive JavaScript reference and guides from Mozilla Developer Network",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript",
+        "tags": ["javascript", "fundamentals"],
+        "related": ["typescript", "es6"]
+      },
+      {
+        "id": "javascript-info",
+        "name": "JavaScript.info",
+        "description": "Modern JavaScript tutorial with in-depth explanations",
+        "url": "https://javascript.info/",
+        "tags": ["javascript", "tutorial"],
+        "related": ["mdn-js"]
+      }
+    ],
+    "typescript": [
+      {
+        "id": "ts-handbook",
+        "name": "TypeScript Handbook",
+        "description": "Official TypeScript documentation and language reference",
+        "url": "https://www.typescriptlang.org/docs/handbook/intro.html",
+        "tags": ["typescript", "types"],
+        "related": ["javascript"]
+      },
+      {
+        "id": "ts-config",
+        "name": "TSConfig Reference",
+        "description": "Complete reference for TypeScript compiler configuration",
+        "url": "https://www.typescriptlang.org/tsconfig",
+        "tags": ["typescript", "configuration"],
+        "related": ["ts-handbook"]
+      }
+    ],
+    "react": [
+      {
+        "id": "react-start",
+        "name": "React Quick Start",
+        "description": "Official React documentation and getting started guide",
+        "url": "https://react.dev/learn",
+        "tags": ["react", "frontend"],
+        "related": ["react-hooks", "react-router"]
+      },
+      {
+        "id": "react-hooks",
+        "name": "React Hooks",
+        "description": "Complete guide to React Hooks API",
+        "url": "https://react.dev/reference/react",
+        "tags": ["react", "hooks"],
+        "related": ["react-start"]
+      },
+      {
+        "id": "react-server-components",
+        "name": "React Server Components",
+        "description": "Server Components for data fetching and rendering on the server",
+        "url": "https://react.dev/reference/rsc/server-components",
+        "tags": ["react", "server", "rsc"],
+        "related": ["nextjs", "react-suspense"]
+      },
+      {
+        "id": "react-suspense",
+        "name": "React Suspense",
+        "description": "Suspense for data fetching and code splitting",
+        "url": "https://react.dev/reference/react/Suspense",
+        "tags": ["react", "async", "suspense"],
+        "related": ["react-server-components", "react-lazy"]
+      },
+      {
+        "id": "react-error-boundaries",
+        "name": "Error Boundaries",
+        "description": "Catch and handle errors in React component trees",
+        "url": "https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary",
+        "tags": ["react", "error-handling"],
+        "related": ["react-start"]
+      },
+      {
+        "id": "nextjs",
+        "name": "Next.js Documentation",
+        "description": "React framework for production with SSR, SSG, and App Router",
+        "url": "https://nextjs.org/docs",
+        "tags": ["react", "framework", "ssr"],
+        "related": ["react-server-components", "react-router"]
+      },
+      {
+        "id": "nextjs-app-router",
+        "name": "Next.js App Router",
+        "description": "New file-based routing with React Server Components",
+        "url": "https://nextjs.org/docs/app",
+        "tags": ["nextjs", "routing", "rsc"],
+        "related": ["nextjs", "react-server-components"]
+      },
+      {
+        "id": "react-router",
+        "name": "React Router",
+        "description": "Declarative routing library for React applications",
+        "url": "https://reactrouter.com/en/main",
+        "tags": ["react", "routing"],
+        "related": ["nextjs", "react-start"]
+      },
+      {
+        "id": "tanstack-query",
+        "name": "TanStack Query (React Query)",
+        "description": "Powerful data synchronization and caching for React",
+        "url": "https://tanstack.com/query/latest/docs/framework/react/overview",
+        "tags": ["react", "data-fetching", "cache"],
+        "related": ["react-suspense", "swr"]
+      },
+      {
+        "id": "swr",
+        "name": "SWR",
+        "description": "React Hooks for data fetching by Vercel",
+        "url": "https://swr.vercel.app/",
+        "tags": ["react", "data-fetching", "hooks"],
+        "related": ["tanstack-query", "react-hooks"]
+      },
+      {
+        "id": "zustand",
+        "name": "Zustand",
+        "description": "Lightweight state management library for React",
+        "url": "https://zustand-demo.pmnd.rs/",
+        "tags": ["react", "state-management"],
+        "related": ["jotai", "redux-toolkit"]
+      },
+      {
+        "id": "jotai",
+        "name": "Jotai",
+        "description": "Primitive and flexible state management for React",
+        "url": "https://jotai.org/docs/introduction",
+        "tags": ["react", "state-management", "atoms"],
+        "related": ["zustand", "recoil"]
+      },
+      {
+        "id": "redux-toolkit",
+        "name": "Redux Toolkit",
+        "description": "Official, opinionated Redux toolset for efficient development",
+        "url": "https://redux-toolkit.js.org/introduction/getting-started",
+        "tags": ["react", "state-management", "redux"],
+        "related": ["zustand", "react-hooks"]
+      },
+      {
+        "id": "react-hook-form",
+        "name": "React Hook Form",
+        "description": "Performant, flexible form validation library",
+        "url": "https://react-hook-form.com/get-started",
+        "tags": ["react", "forms", "validation"],
+        "related": ["zod", "yup"]
+      },
+      {
+        "id": "zod",
+        "name": "Zod",
+        "description": "TypeScript-first schema validation library",
+        "url": "https://zod.dev/",
+        "tags": ["typescript", "validation"],
+        "related": ["react-hook-form", "yup"]
+      },
+      {
+        "id": "react-testing-library",
+        "name": "React Testing Library",
+        "description": "Test React components with user-centric queries",
+        "url": "https://testing-library.com/docs/react-testing-library/intro/",
+        "tags": ["react", "testing"],
+        "related": ["vitest", "jest"]
+      },
+      {
+        "id": "vitest",
+        "name": "Vitest",
+        "description": "Fast unit testing framework powered by Vite",
+        "url": "https://vitest.dev/guide/",
+        "tags": ["testing", "vite"],
+        "related": ["react-testing-library", "playwright"]
+      },
+      {
+        "id": "framer-motion",
+        "name": "Framer Motion",
+        "description": "Production-ready animation library for React",
+        "url": "https://www.framer.com/motion/introduction/",
+        "tags": ["react", "animation"],
+        "related": ["react-spring"]
+      },
+      {
+        "id": "react-performance",
+        "name": "React Performance Optimization",
+        "description": "Guide to optimizing React application performance",
+        "url": "https://react.dev/learn/render-and-commit",
+        "tags": ["react", "performance"],
+        "related": ["react-hooks", "react-suspense"]
+      },
+      {
+        "id": "vite",
+        "name": "Vite",
+        "description": "Next-generation frontend build tool for modern web projects",
+        "url": "https://vitejs.dev/guide/",
+        "tags": ["build-tool", "vite"],
+        "related": ["vitest", "react-start"]
+      }
+    ],
+    "ui-libraries": [
+      {
+        "id": "shadcn",
+        "name": "shadcn/ui Components",
+        "description": "Re-usable components built with Radix UI and Tailwind CSS",
+        "url": "https://ui.shadcn.com/docs",
+        "tags": ["components", "ui"],
+        "related": ["radix-ui", "tailwind"]
+      },
+      {
+        "id": "radix-ui",
+        "name": "Radix UI Primitives",
+        "description": "Low-level UI component library with accessibility",
+        "url": "https://www.radix-ui.com/primitives/docs/overview/introduction",
+        "tags": ["components", "accessibility"],
+        "related": ["shadcn"]
+      }
+    ],
+    "css": [
+      {
+        "id": "tailwind",
+        "name": "Tailwind CSS",
+        "description": "Utility-first CSS framework documentation",
+        "url": "https://tailwindcss.com/docs",
+        "tags": ["css", "utility"],
+        "related": ["css-mdn"]
+      },
+      {
+        "id": "css-mdn",
+        "name": "CSS - MDN",
+        "description": "CSS reference and guides from Mozilla Developer Network",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/CSS",
+        "tags": ["css", "fundamentals"],
+        "related": ["tailwind", "sass"]
+      },
+      {
+        "id": "sass",
+        "name": "Sass Documentation",
+        "description": "CSS preprocessor with variables, nesting, and mixins",
+        "url": "https://sass-lang.com/documentation",
+        "tags": ["css", "preprocessor"],
+        "related": ["css-mdn"]
+      }
+    ]
+  },
+  "backend": {
+    "apis": [
+      {
+        "id": "graphql",
+        "name": "GraphQL",
+        "description": "Query language for APIs with official documentation",
+        "url": "https://graphql.org/learn/",
+        "tags": ["api", "graphql"],
+        "related": ["rest-api"]
+      },
+      {
+        "id": "rest-api",
+        "name": "REST API Design",
+        "description": "RESTful API design best practices",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP",
+        "tags": ["api", "rest"],
+        "related": ["graphql"]
+      },
+      {
+        "id": "grpc",
+        "name": "gRPC",
+        "description": "High-performance RPC framework documentation",
+        "url": "https://grpc.io/docs/",
+        "tags": ["api", "rpc"],
+        "related": ["protobuf"]
+      }
+    ],
+    "messaging": [
+      {
+        "id": "websocket",
+        "name": "WebSocket",
+        "description": "Real-time bidirectional communication protocol",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API",
+        "tags": ["realtime", "websocket"],
+        "related": ["socket-io"]
+      },
+      {
+        "id": "nats",
+        "name": "NATS Messaging",
+        "description": "Cloud native messaging system documentation",
+        "url": "https://docs.nats.io/",
+        "tags": ["messaging", "pubsub"],
+        "related": ["rabbitmq", "kafka"]
+      },
+      {
+        "id": "rabbitmq",
+        "name": "RabbitMQ",
+        "description": "Message broker with multiple messaging protocols",
+        "url": "https://www.rabbitmq.com/documentation.html",
+        "tags": ["messaging", "broker"],
+        "related": ["nats", "kafka"]
+      },
+      {
+        "id": "kafka",
+        "name": "Apache Kafka",
+        "description": "Distributed event streaming platform",
+        "url": "https://kafka.apache.org/documentation/",
+        "tags": ["messaging", "streaming"],
+        "related": ["rabbitmq"]
+      }
+    ],
+    "databases": [
+      {
+        "id": "postgresql",
+        "name": "PostgreSQL",
+        "description": "Advanced open source relational database",
+        "url": "https://www.postgresql.org/docs/",
+        "tags": ["database", "sql"],
+        "related": ["sql-tutorial"]
+      },
+      {
+        "id": "mongodb",
+        "name": "MongoDB",
+        "description": "Document-oriented NoSQL database",
+        "url": "https://www.mongodb.com/docs/",
+        "tags": ["database", "nosql"],
+        "related": ["mongoose"]
+      },
+      {
+        "id": "redis",
+        "name": "Redis",
+        "description": "In-memory data structure store and cache",
+        "url": "https://redis.io/docs/",
+        "tags": ["database", "cache"],
+        "related": ["redis-pubsub"]
+      },
+      {
+        "id": "elasticsearch",
+        "name": "Elasticsearch",
+        "description": "Distributed search and analytics engine",
+        "url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html",
+        "tags": ["database", "search"],
+        "related": ["kibana"]
+      },
+      {
+        "id": "qdrant",
+        "name": "Qdrant",
+        "description": "High-performance vector database for AI/ML applications",
+        "url": "https://qdrant.tech/documentation/",
+        "tags": ["database", "vector", "ai", "embeddings"],
+        "related": ["elasticsearch", "milvus"]
+      },
+      {
+        "id": "minio",
+        "name": "MinIO",
+        "description": "High-performance S3-compatible object storage",
+        "url": "https://min.io/docs/minio/linux/index.html",
+        "tags": ["database", "storage", "s3", "object-storage"],
+        "related": ["postgresql"]
+      }
+    ]
+  },
+  "infrastructure": {
+    "kubernetes": [
+      {
+        "id": "deployments",
+        "name": "Kubernetes Deployments",
+        "description": "Official guide for creating and managing Kubernetes deployments",
+        "url": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/",
+        "tags": ["workloads", "controllers"],
+        "related": ["services", "statefulsets"]
+      },
+      {
+        "id": "services",
+        "name": "Kubernetes Services",
+        "description": "Service networking and load balancing in Kubernetes",
+        "url": "https://kubernetes.io/docs/concepts/services-networking/service/",
+        "tags": ["networking", "load-balancing"],
+        "related": ["ingress", "deployments"]
+      },
+      {
+        "id": "ingress",
+        "name": "Kubernetes Ingress",
+        "description": "HTTP/HTTPS routing and ingress controllers",
+        "url": "https://kubernetes.io/docs/concepts/services-networking/ingress/",
+        "tags": ["networking", "routing"],
+        "related": ["services", "traefik"]
+      },
+      {
+        "id": "configmaps",
+        "name": "ConfigMaps",
+        "description": "Store and manage configuration data in Kubernetes",
+        "url": "https://kubernetes.io/docs/concepts/configuration/configmap/",
+        "tags": ["configuration"],
+        "related": ["secrets"]
+      },
+      {
+        "id": "secrets",
+        "name": "Kubernetes Secrets",
+        "description": "Manage sensitive data like passwords and API keys",
+        "url": "https://kubernetes.io/docs/concepts/configuration/secret/",
+        "tags": ["security", "configuration"],
+        "related": ["configmaps", "rbac"]
+      },
+      {
+        "id": "rbac",
+        "name": "Role-Based Access Control (RBAC)",
+        "description": "Authorization and access control in Kubernetes",
+        "url": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/",
+        "tags": ["security", "authorization"],
+        "related": ["secrets"]
+      },
+      {
+        "id": "statefulsets",
+        "name": "StatefulSets",
+        "description": "Manage stateful applications with persistent storage",
+        "url": "https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/",
+        "tags": ["workloads", "stateful"],
+        "related": ["persistent-volumes", "deployments"]
+      },
+      {
+        "id": "persistent-volumes",
+        "name": "Persistent Volumes",
+        "description": "Storage management and persistent volume claims",
+        "url": "https://kubernetes.io/docs/concepts/storage/persistent-volumes/",
+        "tags": ["storage"],
+        "related": ["statefulsets"]
+      }
+    ],
+    "terraform": [
+      {
+        "id": "gcp-provider",
+        "name": "Terraform GCP Provider",
+        "description": "Google Cloud Platform provider for Terraform",
+        "url": "https://registry.terraform.io/providers/hashicorp/google/latest/docs",
+        "tags": ["providers", "gcp"],
+        "related": ["gcp-gke", "modules"]
+      },
+      {
+        "id": "modules",
+        "name": "Terraform Modules",
+        "description": "Create and use reusable Terraform modules",
+        "url": "https://developer.hashicorp.com/terraform/language/modules",
+        "tags": ["modules", "reusability"],
+        "related": ["best-practices"]
+      },
+      {
+        "id": "state",
+        "name": "Terraform State",
+        "description": "Managing Terraform state and remote backends",
+        "url": "https://developer.hashicorp.com/terraform/language/state",
+        "tags": ["state", "backend"],
+        "related": ["remote-backend"]
+      },
+      {
+        "id": "gcp-gke",
+        "name": "GCP GKE Resource",
+        "description": "Terraform configuration for Google Kubernetes Engine",
+        "url": "https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster",
+        "tags": ["gcp", "kubernetes"],
+        "related": ["gcp-provider", "deployments"]
+      }
+    ],
+    "docker": [
+      {
+        "id": "dockerfile-best-practices",
+        "name": "Dockerfile Best Practices",
+        "description": "Official guidelines for writing efficient Dockerfiles",
+        "url": "https://docs.docker.com/develop/develop-images/dockerfile_best-practices/",
+        "tags": ["dockerfile", "optimization"],
+        "related": ["multistage-builds"]
+      },
+      {
+        "id": "multistage-builds",
+        "name": "Multi-stage Builds",
+        "description": "Create smaller images with multi-stage Docker builds",
+        "url": "https://docs.docker.com/build/building/multi-stage/",
+        "tags": ["dockerfile", "optimization"],
+        "related": ["dockerfile-best-practices"]
+      },
+      {
+        "id": "compose",
+        "name": "Docker Compose",
+        "description": "Define and run multi-container Docker applications",
+        "url": "https://docs.docker.com/compose/",
+        "tags": ["compose", "orchestration"],
+        "related": ["networking"]
+      },
+      {
+        "id": "security",
+        "name": "Docker Security",
+        "description": "Security best practices for Docker containers",
+        "url": "https://docs.docker.com/engine/security/",
+        "tags": ["security"],
+        "related": ["dockerfile-best-practices"]
+      }
+    ],
+    "gcp": [
+      {
+        "id": "gke-quickstart",
+        "name": "GKE Quickstart",
+        "description": "Getting started with Google Kubernetes Engine",
+        "url": "https://cloud.google.com/kubernetes-engine/docs/quickstart",
+        "tags": ["gke", "kubernetes", "quickstart"],
+        "related": ["deployments"]
+      },
+      {
+        "id": "cloud-run",
+        "name": "Cloud Run",
+        "description": "Serverless container platform on GCP",
+        "url": "https://cloud.google.com/run/docs",
+        "tags": ["serverless", "containers"],
+        "related": ["docker", "gke-quickstart"]
+      },
+      {
+        "id": "iam",
+        "name": "GCP IAM",
+        "description": "Identity and Access Management on Google Cloud",
+        "url": "https://cloud.google.com/iam/docs",
+        "tags": ["security", "iam"],
+        "related": ["rbac"]
+      },
+      {
+        "id": "vpc",
+        "name": "VPC Networks",
+        "description": "Virtual Private Cloud networking on GCP",
+        "url": "https://cloud.google.com/vpc/docs",
+        "tags": ["networking", "vpc"],
+        "related": ["gke-quickstart"]
+      }
+    ],
+    "helm": [
+      {
+        "id": "getting-started",
+        "name": "Helm Getting Started",
+        "description": "Introduction to Helm package manager for Kubernetes",
+        "url": "https://helm.sh/docs/intro/quickstart/",
+        "tags": ["quickstart"],
+        "related": ["charts"]
+      },
+      {
+        "id": "charts",
+        "name": "Helm Charts",
+        "description": "Creating and managing Helm charts",
+        "url": "https://helm.sh/docs/topics/charts/",
+        "tags": ["charts"],
+        "related": ["values"]
+      },
+      {
+        "id": "values",
+        "name": "Helm Values",
+        "description": "Configuring Helm charts with values files",
+        "url": "https://helm.sh/docs/chart_template_guide/values_files/",
+        "tags": ["configuration", "values"],
+        "related": ["charts"]
+      }
+    ],
+    "traefik": [
+      {
+        "id": "kubernetes-ingress",
+        "name": "Traefik Kubernetes Ingress",
+        "description": "Using Traefik as Kubernetes ingress controller",
+        "url": "https://doc.traefik.io/traefik/providers/kubernetes-ingress/",
+        "tags": ["kubernetes", "ingress"],
+        "related": ["ingress", "middlewares"]
+      },
+      {
+        "id": "middlewares",
+        "name": "Traefik Middlewares",
+        "description": "Configure request/response middlewares in Traefik",
+        "url": "https://doc.traefik.io/traefik/middlewares/overview/",
+        "tags": ["middlewares", "routing"],
+        "related": ["kubernetes-ingress"]
+      }
+    ]
+  }
+}

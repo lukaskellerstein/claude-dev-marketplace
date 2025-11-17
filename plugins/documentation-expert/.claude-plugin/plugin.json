@@ -1,0 +1,36 @@
+{
+  "name": "documentation-expert",
+  "version": "1.0.0",
+  "description": "Generate comprehensive documentation including README, CHANGELOG, CONTRIBUTING, architecture docs, ADRs, and API documentation with diagram support, document conversion, validation, and health scoring",
+  "author": {
+    "name": "Claude Code Marketplace",
+    "url": "https://github.com/lukaskellerstein/claude-dev-marketplace"
+  },
+  "homepage": "https://github.com/lukaskellerstein/claude-dev-marketplace/tree/main/plugins/documentation-generator",
+  "repository": "https://github.com/lukaskellerstein/claude-dev-marketplace",
+  "license": "MIT",
+  "keywords": [
+    "documentation",
+    "readme",
+    "changelog",
+    "contributing",
+    "architecture",
+    "api-docs",
+    "mermaid",
+    "diagrams",
+    "markdown",
+    "docstrings",
+    "jsdoc",
+    "adr",
+    "openapi",
+    "validation",
+    "health-score",
+    "doc-conversion",
+    "markitdown",
+    "c4-model",
+    "uml"
+  ],
+  "commands": "./commands/",
+  "agents": "./agents/",
+  "mcpServers": "./.mcp.json"
+}

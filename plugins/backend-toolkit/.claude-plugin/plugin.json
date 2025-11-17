@@ -1,0 +1,36 @@
+{
+  "name": "backend-toolkit",
+  "version": "1.0.0",
+  "description": "Comprehensive backend development toolkit for REST, GraphQL, gRPC, WebSocket, and message brokers across Node.js, Go, and Python",
+  "author": {
+    "name": "Claude Code Team",
+    "email": "team@claude.code",
+    "url": "https://github.com/claude-code/backend-toolkit"
+  },
+  "keywords": [
+    "backend",
+    "api",
+    "rest",
+    "graphql",
+    "grpc",
+    "websocket",
+    "nodejs",
+    "golang",
+    "python",
+    "fastapi",
+    "express",
+    "gin",
+    "nats",
+    "rabbitmq",
+    "redis",
+    "kafka"
+  ],
+  "commands": [
+    "./commands/api.md",
+    "./commands/server.md",
+    "./commands/broker.md",
+    "./commands/test-api.md"
+  ],
+  "agents": "./agents/",
+  "skills": "./skills/"
+}

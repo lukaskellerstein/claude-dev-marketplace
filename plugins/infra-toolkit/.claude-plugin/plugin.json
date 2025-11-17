@@ -1,0 +1,27 @@
+{
+  "name": "infra-toolkit",
+  "version": "2.0.0",
+  "description": "Comprehensive infrastructure toolkit for GCP, K8s, Docker, Terraform, and Helm",
+  "author": {
+    "name": "Infrastructure Team",
+    "email": "infra@example.com",
+    "url": "https://github.com/infra-toolkit"
+  },
+  "homepage": "https://github.com/infra-toolkit/docs",
+  "repository": "https://github.com/infra-toolkit/plugin",
+  "license": "MIT",
+  "keywords": [
+    "gcp",
+    "kubernetes",
+    "docker",
+    "terraform",
+    "helm",
+    "infrastructure",
+    "devops",
+    "cloud"
+  ],
+  "commands": ["./commands/*.md"],
+  "agents": "./agents/",
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json"
+}

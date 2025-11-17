@@ -1,0 +1,39 @@
+{
+  "name": "claude-dev-marketplace",
+  "version": "1.0.0",
+  "description": "A marketplace for Claude Code plugins focused on development best practices and productivity tools",
+  "owner": {
+    "name": "Lukas Kellnerstein",
+    "email": "lukas@example.com",
+    "url": "https://github.com/lukaskellerstein"
+  },
+  "plugins": [
+    {
+      "name": "ai-development-guidelines",
+      "version": "1.2.0",
+      "description": "Comprehensive AI-assisted development guidelines with 3 specialized agents, 2 auto-activated skills, MCP servers, and SOLID principles for clean, maintainable code",
+      "author": "Lukas Kellnerstein",
+      "license": "MIT",
+      "category": "ai-ml",
+      "keywords": [
+        "ai",
+        "guidelines",
+        "best-practices",
+        "solid",
+        "clean-code",
+        "development",
+        "mcp",
+        "shadcn",
+        "agents",
+        "skills",
+        "code-review",
+        "refactoring",
+        "architecture"
+      ],
+      "source": {
+        "type": "path",
+        "path": "./plugins/ai-development-guidelines"
+      }
+    }
+  ]
+}

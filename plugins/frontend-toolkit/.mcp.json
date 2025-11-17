@@ -1,0 +1,60 @@
+{
+  "mcpServers": {
+    "javascript-docs": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "env": {
+        "ALLOWED_DOMAINS": "developer.mozilla.org,javascript.info"
+      },
+      "description": "JavaScript documentation (MDN & javascript.info)"
+    },
+    "typescript-docs": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "env": {
+        "ALLOWED_DOMAINS": "typescriptlang.org,www.typescriptlang.org"
+      },
+      "description": "TypeScript official documentation"
+    },
+    "react-docs": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "env": {
+        "ALLOWED_DOMAINS": "react.dev"
+      },
+      "description": "React official documentation"
+    },
+    "shadcn-docs": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "env": {
+        "ALLOWED_DOMAINS": "ui.shadcn.com"
+      },
+      "description": "shadcn/ui component library documentation"
+    },
+    "radix-docs": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "env": {
+        "ALLOWED_DOMAINS": "radix-ui.com,www.radix-ui.com"
+      },
+      "description": "Radix UI primitives documentation"
+    },
+    "tailwind-docs": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "env": {
+        "ALLOWED_DOMAINS": "tailwindcss.com"
+      },
+      "description": "Tailwind CSS documentation"
+    },
+    "css-docs": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "env": {
+        "ALLOWED_DOMAINS": "developer.mozilla.org,css-tricks.com,sass-lang.com"
+      },
+      "description": "CSS/SCSS documentation (MDN, CSS-Tricks, Sass)"
+    }
+  }
+}

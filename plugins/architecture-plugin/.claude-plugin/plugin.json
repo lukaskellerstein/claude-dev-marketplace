@@ -1,0 +1,33 @@
+{
+  "name": "architecture-plugin",
+  "version": "1.0.0",
+  "description": "Architecture design toolkit for microservices, cloud patterns, and system design",
+  "author": {
+    "name": "Claude Code Team",
+    "email": "team@claude.code",
+    "url": "https://github.com/claude-code/architecture-plugin"
+  },
+  "keywords": [
+    "architecture",
+    "microservices",
+    "ddd",
+    "event-sourcing",
+    "cqrs",
+    "monolith",
+    "cloud",
+    "patterns",
+    "system-design",
+    "saga"
+  ],
+  "commands": [
+    "./commands/architect.md",
+    "./commands/analyze.md",
+    "./commands/migrate.md",
+    "./commands/visualize.md",
+    "./commands/pattern.md"
+  ],
+  "agents": "./agents/",
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.json",
+  "mcpServers": "./.mcp.json"
+}

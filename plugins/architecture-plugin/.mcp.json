@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "architecture-analyzer": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-everything"],
+      "env": {
+        "ANALYSIS_DEPTH": "3",
+        "ENABLED_FEATURES": "codebase-analysis,dependency-graph,metrics"
+      }
+    }
+  }
+}

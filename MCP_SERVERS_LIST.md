@@ -77,6 +77,59 @@ EPubs
 }
 ```
 
+# Google cloud
+
+Documentation: `https://github.com/googleapis/gcloud-mcp`
+
+GCloud:
+
+```json
+{
+  "mcpServers": {
+    "gcloud": {
+      "command": "npx",
+      "args": ["-y", "@google-cloud/gcloud-mcp"]
+    }
+  }
+}
+```
+
+Google Cloud storage:
+
+```json
+{
+  "mcpServers": {
+    "gcloudstorage": {
+      "command": "npx",
+      "args": ["-y", "@google-cloud/storage-mcp"]
+    }
+  }
+}
+```
+
+# Terraform
+
+Documentation: `https://github.com/hashicorp/terraform-mcp-server`
+
+```json
+{
+  "mcpServers": {
+    "terraform": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "hashicorp/terraform-mcp-server:0.2.3"]
+    }
+  }
+}
+```
+
+# Helm
+
+Official one is not available.
+
+# Kubernetes
+
+Official one is not available.
+
 # Documentations
 
 ```json

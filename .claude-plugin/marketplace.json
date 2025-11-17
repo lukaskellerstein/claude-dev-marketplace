@@ -3,36 +3,153 @@
   "version": "1.0.0",
   "description": "A marketplace for Claude Code plugins focused on development best practices and productivity tools",
   "owner": {
-    "name": "Lukas Kellnerstein",
-    "email": "lukas@example.com",
+    "name": "Lukas Kellerstein",
     "url": "https://github.com/lukaskellerstein"
   },
   "plugins": [
     {
-      "name": "ai-development-guidelines",
-      "version": "1.2.0",
-      "description": "Comprehensive AI-assisted development guidelines with 3 specialized agents, 2 auto-activated skills, MCP servers, and SOLID principles for clean, maintainable code",
-      "author": "Lukas Kellnerstein",
+      "name": "architecture-plugin",
+      "version": "1.0.0",
+      "description": "Architecture design toolkit for microservices, cloud patterns, and system design",
+      "author": {
+        "name": "Claude Code Team"
+      },
       "license": "MIT",
-      "category": "ai-ml",
+      "category": "architecture",
       "keywords": [
-        "ai",
-        "guidelines",
-        "best-practices",
-        "solid",
-        "clean-code",
-        "development",
-        "mcp",
-        "shadcn",
-        "agents",
-        "skills",
-        "code-review",
-        "refactoring",
-        "architecture"
+        "architecture",
+        "microservices",
+        "ddd",
+        "event-sourcing",
+        "cqrs",
+        "monolith",
+        "cloud",
+        "patterns",
+        "system-design",
+        "saga"
       ],
       "source": {
         "type": "path",
-        "path": "./plugins/ai-development-guidelines"
+        "path": "./plugins/architecture-plugin"
+      }
+    },
+    {
+      "name": "backend-toolkit",
+      "version": "1.0.0",
+      "description": "Comprehensive backend development toolkit for REST, GraphQL, gRPC, WebSocket, and message brokers across Node.js, Go, and Python",
+      "author": {
+        "name": "Claude Code Team"
+      },
+      "license": "MIT",
+      "category": "backend",
+      "keywords": [
+        "backend",
+        "api",
+        "rest",
+        "graphql",
+        "grpc",
+        "websocket",
+        "nodejs",
+        "golang",
+        "python",
+        "fastapi",
+        "express",
+        "gin",
+        "nats",
+        "rabbitmq",
+        "redis",
+        "kafka"
+      ],
+      "source": {
+        "type": "path",
+        "path": "./plugins/backend-toolkit"
+      }
+    },
+    {
+      "name": "documentation-expert",
+      "version": "1.0.0",
+      "description": "Generate comprehensive documentation including README, CHANGELOG, CONTRIBUTING, architecture docs, ADRs, and API documentation with diagram support, document conversion, validation, and health scoring",
+      "author": {
+        "name": "Claude Code Marketplace"
+      },
+      "license": "MIT",
+      "category": "documentation",
+      "keywords": [
+        "documentation",
+        "readme",
+        "changelog",
+        "contributing",
+        "architecture",
+        "api-docs",
+        "mermaid",
+        "diagrams",
+        "markdown",
+        "docstrings",
+        "jsdoc",
+        "adr",
+        "openapi",
+        "validation",
+        "health-score",
+        "doc-conversion",
+        "markitdown",
+        "c4-model",
+        "uml"
+      ],
+      "source": {
+        "type": "path",
+        "path": "./plugins/documentation-expert"
+      }
+    },
+    {
+      "name": "frontend-toolkit",
+      "version": "2.0.0",
+      "description": "Comprehensive frontend development toolkit for React, TypeScript, and modern styling with Tailwind CSS, shadcn-ui, and Radix UI",
+      "author": {
+        "name": "Lukas Kellnerstein"
+      },
+      "license": "MIT",
+      "category": "frontend",
+      "keywords": [
+        "react",
+        "typescript",
+        "tailwind",
+        "shadcn",
+        "radix",
+        "frontend",
+        "css",
+        "scss",
+        "responsive",
+        "accessibility",
+        "design-system",
+        "ui-components"
+      ],
+      "source": {
+        "type": "path",
+        "path": "./plugins/frontend-toolkit"
+      }
+    },
+    {
+      "name": "infra-toolkit",
+      "version": "2.0.0",
+      "description": "Comprehensive infrastructure toolkit for GCP, K8s, Docker, Terraform, and Helm",
+      "author": {
+        "name": "Infrastructure Team"
+      },
+      "license": "MIT",
+      "category": "infrastructure",
+      "keywords": [
+        "gcp",
+        "kubernetes",
+        "docker",
+        "terraform",
+        "helm",
+        "infrastructure",
+        "devops",
+        "cloud"
+      ],
+      "source": {
+        "type": "path",
+        "path": "./plugins/infra-toolkit"
       }
     }
   ]

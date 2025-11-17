@@ -1,0 +1,43 @@
+{
+  "name": "llm-toolkit",
+  "version": "1.0.0",
+  "description": "Comprehensive LLM toolkit for training, fine-tuning, and deployment",
+  "author": {
+    "name": "Claude Code Team",
+    "email": "team@claude.code",
+    "url": "https://github.com/claude-code/llm-toolkit"
+  },
+  "homepage": "https://github.com/claude-code/llm-toolkit",
+  "repository": "https://github.com/claude-code/llm-toolkit",
+  "license": "MIT",
+  "keywords": [
+    "llm",
+    "pytorch",
+    "huggingface",
+    "transformers",
+    "unsloth",
+    "vllm",
+    "ollama",
+    "training",
+    "finetuning",
+    "lora",
+    "qlora",
+    "rlhf",
+    "dpo",
+    "llama",
+    "mistral",
+    "gpt"
+  ],
+  "commands": [
+    "./commands/train.md",
+    "./commands/finetune.md",
+    "./commands/serve.md",
+    "./commands/evaluate.md",
+    "./commands/quantize.md",
+    "./commands/dataset.md"
+  ],
+  "agents": "./agents/",
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.json",
+  "mcpServers": "./mcp-servers/config.json"
+}

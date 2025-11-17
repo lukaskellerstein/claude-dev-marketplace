@@ -1,5 +1,5 @@
 {
-  "name": "llm-toolkit",
+  "name": "llm-plugin",
   "version": "1.0.0",
   "description": "Comprehensive LLM toolkit for training, fine-tuning, and deployment",
   "author": {

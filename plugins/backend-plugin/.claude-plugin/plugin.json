@@ -1,5 +1,5 @@
 {
-  "name": "backend-toolkit",
+  "name": "backend-plugin",
   "version": "1.0.0",
   "description": "Comprehensive backend development toolkit for REST, GraphQL, gRPC, WebSocket, and message brokers across Node.js, Go, and Python",
   "author": {
@@ -31,6 +31,14 @@
     "./commands/broker.md",
     "./commands/test-api.md"
   ],
-  "agents": "./agents/",
+  "agents": [
+    "./agents/api-architect.md",
+    "./agents/broker-specialist.md",
+    "./agents/golang-specialist.md",
+    "./agents/graphql-expert.md",
+    "./agents/grpc-expert.md",
+    "./agents/nodejs-specialist.md",
+    "./agents/python-specialist.md"
+  ],
   "skills": "./skills/"
 }

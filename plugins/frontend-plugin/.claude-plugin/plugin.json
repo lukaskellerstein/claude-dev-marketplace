@@ -1,5 +1,5 @@
 {
-  "name": "frontend-toolkit",
+  "name": "frontend-plugin",
   "version": "1.0.0",
   "description": "Comprehensive frontend development toolkit for React, TypeScript, and modern styling with Tailwind CSS, shadcn-ui, and Radix UI",
   "author": {

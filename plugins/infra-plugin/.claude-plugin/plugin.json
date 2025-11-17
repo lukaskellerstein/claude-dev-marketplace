@@ -1,5 +1,5 @@
 {
-  "name": "infra-toolkit",
+  "name": "infra-plugin",
   "version": "1.0.0",
   "description": "Comprehensive infrastructure toolkit for GCP, K8s, Docker, Terraform, and Helm",
   "author": {

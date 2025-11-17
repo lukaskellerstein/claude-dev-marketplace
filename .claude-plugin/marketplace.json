@@ -31,7 +31,7 @@
       "source": "./plugins/architecture-plugin"
     },
     {
-      "name": "backend-toolkit",
+      "name": "backend-plugin",
       "version": "1.0.0",
       "description": "Comprehensive backend development toolkit for REST, GraphQL, gRPC, WebSocket, and message brokers across Node.js, Go, and Python",
       "author": {
@@ -57,10 +57,10 @@
         "redis",
         "kafka"
       ],
-      "source": "./plugins/backend-toolkit"
+      "source": "./plugins/backend-plugin"
     },
     {
-      "name": "documentation-expert",
+      "name": "documentation-plugin",
       "version": "1.0.0",
       "description": "Generate comprehensive documentation including README, CHANGELOG, CONTRIBUTING, architecture docs, ADRs, and API documentation with diagram support, document conversion, validation, and health scoring",
       "author": {
@@ -89,10 +89,10 @@
         "c4-model",
         "uml"
       ],
-      "source": "./plugins/documentation-expert"
+      "source": "./plugins/documentation-plugin"
     },
     {
-      "name": "frontend-toolkit",
+      "name": "frontend-plugin",
       "version": "1.0.0",
       "description": "Comprehensive frontend development toolkit for React, TypeScript, and modern styling with Tailwind CSS, shadcn-ui, and Radix UI",
       "author": {
@@ -114,10 +114,10 @@
         "design-system",
         "ui-components"
       ],
-      "source": "./plugins/frontend-toolkit"
+      "source": "./plugins/frontend-plugin"
     },
     {
-      "name": "infra-toolkit",
+      "name": "infra-plugin",
       "version": "1.0.0",
       "description": "Comprehensive infrastructure toolkit for GCP, K8s, Docker, Terraform, and Helm",
       "author": {
@@ -135,7 +135,7 @@
         "devops",
         "cloud"
       ],
-      "source": "./plugins/infra-toolkit"
+      "source": "./plugins/infra-plugin"
     }
   ]
 }

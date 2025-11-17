@@ -1,5 +1,5 @@
 {
-  "name": "documentation-expert",
+  "name": "documentation-plugin",
   "version": "1.0.0",
   "description": "Generate comprehensive documentation including README, CHANGELOG, CONTRIBUTING, architecture docs, ADRs, and API documentation with diagram support, document conversion, validation, and health scoring",
   "author": {

@@ -1,0 +1,36 @@
+{
+  "mcpServers": {
+    "training-monitor": {
+      "description": "Monitors training progress and metrics",
+      "command": "python",
+      "args": ["./mcp-servers/training_monitor.py"],
+      "env": {
+        "WANDB_API_KEY": "${WANDB_API_KEY}",
+        "TENSORBOARD_PORT": "6006"
+      }
+    },
+    "model-registry": {
+      "description": "Manages model versions and metadata",
+      "command": "python",
+      "args": ["./mcp-servers/model_registry.py"],
+      "env": {
+        "REGISTRY_PATH": "./models",
+        "HF_TOKEN": "${HF_TOKEN}"
+      }
+    },
+    "gpu-manager": {
+      "description": "GPU allocation and monitoring",
+      "command": "python",
+      "args": ["./mcp-servers/gpu_manager.py"]
+    },
+    "inference-server": {
+      "description": "Model inference endpoint",
+      "command": "python",
+      "args": ["./mcp-servers/inference_server.py"],
+      "env": {
+        "DEFAULT_MODEL": "llama-2-7b",
+        "PORT": "8080"
+      }
+    }
+  }
+}

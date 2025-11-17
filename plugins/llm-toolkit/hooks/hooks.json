@@ -1,0 +1,114 @@
+{
+  "hooks": {
+    "SessionStart": {
+      "enabled": true,
+      "description": "Check GPU availability and optimize settings on session start",
+      "actions": [
+        {
+          "type": "message",
+          "content": "LLM Plugin loaded. Checking GPU availability..."
+        }
+      ]
+    },
+    "pre-training": {
+      "enabled": true,
+      "pattern": "/train*",
+      "description": "Optimize settings before training starts",
+      "actions": [
+        {
+          "type": "message",
+          "content": "Preparing for training..."
+        }
+      ]
+    },
+    "during-training": {
+      "enabled": true,
+      "trigger": "epoch_end",
+      "description": "Clear cache after each epoch",
+      "actions": [
+        {
+          "type": "message",
+          "content": "Epoch complete. Clearing cache..."
+        }
+      ]
+    },
+    "on-oom": {
+      "enabled": true,
+      "trigger": "oom_error",
+      "description": "Emergency cleanup on out of memory",
+      "actions": [
+        {
+          "type": "message",
+          "content": "OOM detected! Performing emergency cleanup..."
+        }
+      ]
+    },
+    "post-training": {
+      "enabled": true,
+      "pattern": "/train*",
+      "trigger": "completion",
+      "description": "Cleanup and suggest next steps after training",
+      "actions": [
+        {
+          "type": "message",
+          "content": "Training complete. Running evaluation..."
+        }
+      ]
+    },
+    "pre-fine-tuning": {
+      "enabled": true,
+      "pattern": "/finetune*",
+      "description": "Check settings before fine-tuning",
+      "actions": [
+        {
+          "type": "message",
+          "content": "Preparing for fine-tuning..."
+        }
+      ]
+    },
+    "pre-serving": {
+      "enabled": true,
+      "pattern": "/serve*",
+      "description": "Validate model before deployment",
+      "actions": [
+        {
+          "type": "message",
+          "content": "Preparing model for deployment..."
+        }
+      ]
+    },
+    "pre-evaluation": {
+      "enabled": true,
+      "pattern": "/evaluate*",
+      "description": "Setup evaluation environment",
+      "actions": [
+        {
+          "type": "message",
+          "content": "Setting up evaluation..."
+        }
+      ]
+    },
+    "pre-quantization": {
+      "enabled": true,
+      "pattern": "/quantize*",
+      "description": "Prepare for quantization",
+      "actions": [
+        {
+          "type": "message",
+          "content": "Preparing quantization..."
+        }
+      ]
+    },
+    "pre-dataset": {
+      "enabled": true,
+      "pattern": "/dataset*",
+      "description": "Validate dataset operations",
+      "actions": [
+        {
+          "type": "message",
+          "content": "Preparing dataset operations..."
+        }
+      ]
+    }
+  }
+}

@@ -93,7 +93,7 @@
     },
     {
       "name": "frontend-toolkit",
-      "version": "2.0.0",
+      "version": "1.0.0",
       "description": "Comprehensive frontend development toolkit for React, TypeScript, and modern styling with Tailwind CSS, shadcn-ui, and Radix UI",
       "author": {
         "name": "Lukas Kellnerstein"
@@ -118,7 +118,7 @@
     },
     {
       "name": "infra-toolkit",
-      "version": "2.0.0",
+      "version": "1.0.0",
       "description": "Comprehensive infrastructure toolkit for GCP, K8s, Docker, Terraform, and Helm",
       "author": {
         "name": "Infrastructure Team"

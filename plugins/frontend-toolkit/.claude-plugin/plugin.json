@@ -1,6 +1,6 @@
 {
   "name": "frontend-toolkit",
-  "version": "2.0.0",
+  "version": "1.0.0",
   "description": "Comprehensive frontend development toolkit for React, TypeScript, and modern styling with Tailwind CSS, shadcn-ui, and Radix UI",
   "author": {
     "name": "Lukas Kellnerstein",

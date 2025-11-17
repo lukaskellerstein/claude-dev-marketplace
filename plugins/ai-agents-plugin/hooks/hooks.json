@@ -2,6 +2,7 @@
   "hooks": {
     "SessionStart": {
       "enabled": true,
+      "description": "Check Python and AI agent framework versions",
       "actions": [
         {
           "type": "command",
@@ -14,135 +15,6 @@
         {
           "type": "command",
           "command": "python3 -c \"import langchain; import langgraph; print(f'LangChain: {langchain.__version__}, LangGraph: {langgraph.__version__}')\" 2>/dev/null || echo 'LangChain/LangGraph not installed. Use /agent or /workflow commands to install.'"
-        }
-      ]
-    },
-    "pre-agent-create": {
-      "enabled": true,
-      "pattern": "/agent create*",
-      "actions": [
-        {
-          "type": "skill",
-          "name": "security-validation",
-          "action": "validate_config"
-        },
-        {
-          "type": "command",
-          "command": "echo 'Using LangChain 1.0 create_agent pattern'"
-        }
-      ]
-    },
-    "post-agent-create": {
-      "enabled": true,
-      "pattern": "/agent create*",
-      "actions": [
-        {
-          "type": "skill",
-          "name": "agent-monitoring",
-          "action": "setup_monitoring"
-        },
-        {
-          "type": "command",
-          "command": "echo 'Agent created successfully. Consider adding middleware for human-in-the-loop or PII redaction.'"
-        }
-      ]
-    },
-    "pre-workflow-create": {
-      "enabled": true,
-      "pattern": "/workflow create*",
-      "actions": [
-        {
-          "type": "command",
-          "command": "echo 'Creating LangGraph 1.0 workflow with checkpointing enabled'"
-        }
-      ]
-    },
-    "post-workflow-create": {
-      "enabled": true,
-      "pattern": "/workflow create*",
-      "actions": [
-        {
-          "type": "skill",
-          "name": "performance-tuning",
-          "action": "analyze_workflow"
-        },
-        {
-          "type": "command",
-          "command": "echo 'Workflow created. LangGraph 1.0 provides durable execution and human-in-the-loop patterns.'"
-        }
-      ]
-    },
-    "pre-deploy": {
-      "enabled": true,
-      "pattern": "/deploy*",
-      "actions": [
-        {
-          "type": "skill",
-          "name": "security-validation",
-          "action": "pre_deployment_check"
-        },
-        {
-          "type": "skill",
-          "name": "performance-tuning",
-          "action": "production_optimization"
-        },
-        {
-          "type": "command",
-          "command": "echo 'Running pre-deployment checks...'"
-        }
-      ]
-    },
-    "post-deploy": {
-      "enabled": true,
-      "pattern": "/deploy*",
-      "actions": [
-        {
-          "type": "skill",
-          "name": "agent-monitoring",
-          "action": "enable_production_monitoring"
-        },
-        {
-          "type": "command",
-          "command": "echo 'Deployment complete. Monitor agent performance in production.'"
-        }
-      ]
-    },
-    "pre-test": {
-      "enabled": true,
-      "pattern": "/test*",
-      "actions": [
-        {
-          "type": "command",
-          "command": "echo 'Starting agent tests...'"
-        }
-      ]
-    },
-    "post-test": {
-      "enabled": true,
-      "pattern": "/test*",
-      "actions": [
-        {
-          "type": "skill",
-          "name": "performance-tuning",
-          "action": "analyze_test_results"
-        },
-        {
-          "type": "command",
-          "command": "echo 'Tests complete. Review results and optimize if needed.'"
-        }
-      ]
-    },
-    "on-error": {
-      "enabled": true,
-      "actions": [
-        {
-          "type": "skill",
-          "name": "error-recovery",
-          "action": "handle_error"
-        },
-        {
-          "type": "command",
-          "command": "echo 'Error recovery initiated. Check logs for details.'"
         }
       ]
     }

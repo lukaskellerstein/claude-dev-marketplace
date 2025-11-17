@@ -35,6 +35,5 @@
     "./agents/patterns-expert.md"
   ],
   "skills": "./skills/",
-  "hooks": "./hooks/hooks.json",
   "mcpServers": "./.mcp.json"
 }

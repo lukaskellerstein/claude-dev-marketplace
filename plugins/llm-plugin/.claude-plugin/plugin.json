@@ -45,6 +45,5 @@
     "./agents/training-specialist.md"
   ],
   "skills": "./skills/",
-  "hooks": "./hooks/hooks.json",
   "mcpServers": "./.mcp.json"
 }

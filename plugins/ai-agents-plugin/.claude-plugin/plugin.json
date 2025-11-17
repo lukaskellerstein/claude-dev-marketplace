@@ -1,0 +1,42 @@
+{
+  "name": "aiagent-plugin",
+  "version": "2.0.0",
+  "description": "AI agent orchestration for Claude, LangChain 1.0, LangGraph 1.0, Microsoft Agent Framework",
+  "author": {
+    "name": "Claude Code Team",
+    "email": "team@claude.code",
+    "url": "https://github.com/claude-code/aiagent-plugin"
+  },
+  "homepage": "https://github.com/claude-code/aiagent-plugin",
+  "repository": "https://github.com/claude-code/aiagent-plugin",
+  "license": "MIT",
+  "keywords": [
+    "ai-agents",
+    "claude",
+    "langchain",
+    "langgraph",
+    "microsoft-agent-framework",
+    "orchestration",
+    "workflow",
+    "automation",
+    "multi-agent",
+    "langchain-1.0"
+  ],
+  "requirements": {
+    "langchain": ">=1.0.0",
+    "langgraph": ">=1.0.0",
+    "agent-framework": ">=0.1.0",
+    "langchain-anthropic": ">=1.0.0"
+  },
+  "commands": [
+    "./commands/agent.md",
+    "./commands/workflow.md",
+    "./commands/microsoft-agent.md",
+    "./commands/deploy.md",
+    "./commands/test.md"
+  ],
+  "agents": "./agents/",
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.json",
+  "mcpServers": "./.mcp.json"
+}

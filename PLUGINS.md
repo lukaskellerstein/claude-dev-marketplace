@@ -18,7 +18,7 @@ DONE - `infra-plugin` = Google Cloud, Kubernetes, Docker, Terraform, Helm
 
 DONE - `llm-plugin` = Pytorch, HuggingFace (datasets, transformers, trl, peft), Unsloth, vLLM, Ollama, Models - GPT-OSS, Llama4 ... etc.
 
-IN PROGRESS - `aiagent-plugin` = Claude Agent SDK, Codex SDK, Lanchain + Langgraph, Microsoft Agent Framework, Workflows - Temporal.io
+DONE - `aiagent-plugin` = Claude Agent SDK, Codex SDK, Lanchain + Langgraph, Microsoft Agent Framework, Workflows - Temporal.io
 
 ---
 

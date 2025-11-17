@@ -1,0 +1,84 @@
+{
+  "mcpServers": {
+    "rest-graphql-docs": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "env": {
+        "ALLOWED_DOMAINS": "graphql.org,www.graphql.org"
+      },
+      "description": "REST API and GraphQL documentation"
+    },
+    "grpc-docs": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "env": {
+        "ALLOWED_DOMAINS": "grpc.io"
+      },
+      "description": "gRPC official documentation"
+    },
+    "websocket-docs": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "env": {
+        "ALLOWED_DOMAINS": "developer.mozilla.org,socket.io,websocket.org"
+      },
+      "description": "WebSocket documentation"
+    },
+    "nats-docs": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "env": {
+        "ALLOWED_DOMAINS": "docs.nats.io,nats.io"
+      },
+      "description": "NATS messaging system documentation"
+    },
+    "rabbitmq-docs": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "env": {
+        "ALLOWED_DOMAINS": "rabbitmq.com,www.rabbitmq.com"
+      },
+      "description": "RabbitMQ message broker documentation"
+    },
+    "kafka-docs": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "env": {
+        "ALLOWED_DOMAINS": "kafka.apache.org"
+      },
+      "description": "Apache Kafka documentation"
+    },
+    "postgresql-docs": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "env": {
+        "ALLOWED_DOMAINS": "postgresql.org,www.postgresql.org"
+      },
+      "description": "PostgreSQL official documentation"
+    },
+    "mongodb-docs": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "env": {
+        "ALLOWED_DOMAINS": "mongodb.com,www.mongodb.com,docs.mongodb.com"
+      },
+      "description": "MongoDB documentation"
+    },
+    "redis-docs": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "env": {
+        "ALLOWED_DOMAINS": "redis.io,redis.com"
+      },
+      "description": "Redis documentation (including pub/sub)"
+    },
+    "elasticsearch-docs": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "env": {
+        "ALLOWED_DOMAINS": "elastic.co,www.elastic.co"
+      },
+      "description": "Elasticsearch documentation"
+    }
+  }
+}

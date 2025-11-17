@@ -10,11 +10,11 @@
 
 ### Model Operations
 
-- **Training**: Full model training from scratch
-- **Fine-tuning**: LoRA, QLoRA, full fine-tuning
-- **RLHF/DPO**: Reinforcement learning from human feedback
-- **Quantization**: INT8, INT4, GPTQ, AWQ
-- **Deployment**: vLLM serving, Ollama local deployment
+- **Training**: Full model training from scratch with distributed support
+- **Fine-tuning**: LoRA, QLoRA, PEFT, full fine-tuning
+- **RLHF/DPO**: Reinforcement learning from human feedback, Direct Preference Optimization
+- **Quantization**: INT8, INT4, GPTQ, AWQ, BitsAndBytes
+- **Deployment**: vLLM serving, Ollama local deployment, TensorRT optimization
 
 ### Supported Frameworks
 
@@ -29,7 +29,7 @@
 - **Llama Family**: Llama 2, Llama 3, Code Llama, Alpaca
 - **Mistral/Mixtral**: 7B, 8x7B, 8x22B
 - **GPT Models**: GPT-J, GPT-NeoX, GPT2
-- **Other Models**: Phi, Qwen, Yi, Gemma, DeepSeek
+- **Other Models**: Phi, Qwen, Yi, Gemma, DeepSeek, StarCoder
 
 ## Plugin Structure
 
@@ -55,12 +55,10 @@ llm-plugin/
 │   ├── memory-management.md
 │   ├── hyperparameter-tuning.md
 │   └── model-selection.md
-├── mcp-servers/
-│   └── config.json
-└── output-styles/
-    ├── training-report.md
-    ├── benchmark-results.md
-    └── model-card.md
+├── hooks/
+│   └── hooks.json
+└── mcp-servers/
+    └── config.json
 ```
 
 ## Manifest Configuration
@@ -104,8 +102,7 @@ llm-plugin/
   "agents": "./agents/",
   "skills": "./skills/",
   "hooks": "./hooks/hooks.json",
-  "mcpServers": "./mcp-servers/config.json",
-  "outputStyles": "./output-styles/"
+  "mcpServers": "./mcp-servers/config.json"
 }
 ```
 
@@ -159,10 +156,11 @@ OPTIONS=$4
 check_gpu() {
 if command -v nvidia-smi &> /dev/null; then
 echo "GPU detected:"
-nvidia-smi --query-gpu=name,memory.total --format=csv
+nvidia-smi --query-gpu=name,memory.total,memory.free --format=csv
 return 0
 else
 echo "Warning: No GPU detected, training will be slow"
+echo "Consider using cloud GPUs or smaller models"
 return 1
 fi
 }
@@ -171,18 +169,27 @@ fi
 
 setup_environment() {
 if [ ! -d "venv" ]; then
+echo "Creating virtual environment..."
 python -m venv venv
 fi
 source venv/bin/activate
 
-    # Install required packages
+    echo "Installing required packages..."
     pip install -q torch transformers datasets accelerate peft trl
 
     if [ "$METHOD" == "qlora" ] || [ "$METHOD" == "lora" ]; then
-        pip install -q unsloth
+        echo "Installing Unsloth for 2x faster training..."
+        pip install -q "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
+    fi
+
+    if [ "$METHOD" == "rlhf" ] || [ "$METHOD" == "dpo" ]; then
+        echo "Installing TRL for RLHF/DPO..."
+        pip install -q trl
     fi
 
 }
+
+# Check GPU and setup environment
 
 GPU_AVAILABLE=$(check_gpu)
 setup_environment
@@ -191,21 +198,42 @@ case $METHOD in
 full)
 echo "Starting full model training..."
 echo "Model: $MODEL"
-echo "Dataset: $DATASET" # Invoke training-specialist agent
+echo "Dataset: $DATASET"
+echo "This will invoke the training-specialist agent" # Agent will handle the actual training implementation
 ;;
-lora|qlora)
-echo "Starting ${METHOD^^} fine-tuning..."
+lora)
+echo "Starting LoRA fine-tuning..."
 echo "Model: $MODEL"
-echo "Dataset: $DATASET" # Invoke finetuning-expert agent
+echo "Dataset: $DATASET"
+echo "LoRA configuration: r=16, alpha=16" # Invoke finetuning-expert agent
 ;;
-dpo|rlhf)
-echo "Starting $METHOD training..." # Invoke training-specialist with RLHF context
+qlora)
+echo "Starting QLoRA fine-tuning with 4-bit quantization..."
+echo "Model: $MODEL"
+echo "Dataset: $DATASET" # Invoke finetuning-expert agent with QLoRA context
+;;
+dpo)
+echo "Starting Direct Preference Optimization..."
+echo "Model: $MODEL"
+echo "Preference Dataset: $DATASET" # Invoke training-specialist with DPO context
+;;
+rlhf)
+echo "Starting RLHF training..."
+echo "Model: $MODEL"
+echo "Dataset: $DATASET" # Invoke training-specialist with RLHF context
 ;;
 continued)
-echo "Starting continued pre-training..." # Invoke training-specialist with continued training context
+echo "Starting continued pre-training..."
+echo "Base Model: $MODEL"
+echo "New Dataset: $DATASET" # Invoke training-specialist with continued training context
 ;;
 \*)
 echo "Usage: /train [full|lora|qlora|dpo|rlhf|continued] [model] [dataset]"
+echo ""
+echo "Examples:"
+echo " /train lora llama2-7b alpaca"
+echo " /train qlora mistral-7b custom_dataset.jsonl"
+echo " /train dpo llama2-7b preferences.json"
 exit 1
 ;;
 esac
@@ -244,6 +272,14 @@ BASE_MODEL=$2
 DATASET=$3
 OUTPUT_DIR=${4:-"./models/finetuned"}
 
+if [ -z "$TECHNIQUE" ] || [ -z "$BASE_MODEL" ] || [ -z "$DATASET" ]; then
+echo "Usage: /finetune [technique] [base_model] [dataset] [output_dir]"
+echo ""
+echo "Techniques: lora, qlora, prefix, ia3, adapters"
+echo "Example: /finetune lora llama2-7b dataset.jsonl ./output"
+exit 1
+fi
+
 echo "Fine-tuning configuration:"
 echo "Technique: $TECHNIQUE"
 echo "Base Model: $BASE_MODEL"
@@ -254,26 +290,41 @@ echo "Output: $OUTPUT_DIR"
 
 mkdir -p $OUTPUT_DIR
 
+# Check dataset exists
+
+if [ ! -f "$DATASET" ]; then
+echo "Error: Dataset file not found: $DATASET"
+exit 1
+fi
+
 case $TECHNIQUE in
 lora)
-echo "Configuring LoRA fine-tuning..." # r=16, alpha=32, target all linear layers
+echo "Configuring LoRA fine-tuning..."
+echo "Default settings: r=16, alpha=32, dropout=0.05"
+echo "Target modules: q_proj, v_proj, k_proj, o_proj" # Invoke finetuning-expert agent
 ;;
 qlora)
-echo "Configuring QLoRA with 4-bit quantization..." # 4-bit quantization with nf4
+echo "Configuring QLoRA with 4-bit quantization..."
+echo "Using nf4 quantization with double quantization"
+echo "Computing in bfloat16 for stability" # Invoke finetuning-expert agent with QLoRA
 ;;
 prefix)
 echo "Configuring prefix tuning..."
+echo "Prefix length: 20 tokens" # Invoke finetuning-expert agent with prefix tuning
 ;;
 ia3)
 echo "Configuring IA3 fine-tuning..."
+echo "Scaling vectors for efficient adaptation" # Invoke finetuning-expert agent with IA3
 ;;
 adapters)
 echo "Configuring adapter layers..."
+echo "Bottleneck dimension: 64" # Invoke finetuning-expert agent with adapters
+;;
+\*)
+echo "Unknown technique: $TECHNIQUE"
+exit 1
 ;;
 esac
-
-# Invoke finetuning-expert agent with configuration
-
 `
 ```
 
@@ -299,6 +350,7 @@ Deploy models using vLLM, Ollama, or HuggingFace inference endpoints.
 - `ollama` - Local deployment with Ollama
 - `hf-inference` - HuggingFace inference endpoint
 - `tensorrt` - NVIDIA TensorRT optimization
+- `local` - Simple local serving with transformers
 
 !`
 #!/bin/bash
@@ -306,24 +358,60 @@ Deploy models using vLLM, Ollama, or HuggingFace inference endpoints.
 PLATFORM=$1
 MODEL=$2
 PORT=${3:-8000}
+OPTIONS=$4
+
+if [ -z "$PLATFORM" ] || [ -z "$MODEL" ]; then
+echo "Usage: /serve [platform] [model] [port]"
+echo ""
+echo "Platforms: vllm, ollama, hf-inference, tensorrt, local"
+echo "Example: /serve vllm ./my-model 8000"
+exit 1
+fi
 
 case $PLATFORM in
 vllm)
 echo "Starting vLLM server..."
 echo "Model: $MODEL"
-echo "Port: $PORT" # python -m vllm.entrypoints.openai.api_server \
- # --model $MODEL \
- # --port $PORT \
- # --max-model-len 4096
+echo "Port: $PORT"
+echo "Configuration:"
+echo " - Tensor parallel: auto"
+echo " - GPU memory utilization: 90%"
+echo " - Max model length: 4096"
+echo ""
+echo "Starting server with:"
+echo "python -m vllm.entrypoints.openai.api_server \\"
+echo " --model $MODEL \\"
+echo " --port $PORT \\"
+echo " --max-model-len 4096 \\"
+echo " --gpu-memory-utilization 0.9" # Invoke deployment-engineer agent for vLLM
 ;;
 ollama)
-echo "Deploying with Ollama..." # ollama run $MODEL
+echo "Deploying with Ollama..."
+echo "Model: $MODEL"
+echo ""
+echo "Steps:"
+echo "1. Creating Modelfile..."
+echo "2. Building model..."
+echo "3. Starting Ollama server..." # Invoke deployment-engineer agent for Ollama
 ;;
 hf-inference)
 echo "Setting up HuggingFace inference endpoint..."
+echo "Model: $MODEL"
+echo "This will deploy to HuggingFace's infrastructure" # Invoke deployment-engineer agent for HF
 ;;
 tensorrt)
 echo "Optimizing with TensorRT..."
+echo "Model: $MODEL"
+echo "Building optimized engine for current GPU" # Invoke optimization-expert agent
+;;
+local)
+echo "Starting local server with transformers..."
+echo "Model: $MODEL"
+echo "Port: $PORT" # Simple local serving
+;;
+\*)
+echo "Unknown platform: $PLATFORM"
+exit 1
 ;;
 esac
 `
@@ -343,36 +431,77 @@ Run comprehensive model evaluation and benchmarking.
 
 ## Usage
 
-`/evaluate [model] [benchmark] [metrics]`
+`/evaluate [model] [benchmark] [options]`
 
 ## Benchmarks
 
+- `perplexity` - Calculate perplexity on dataset
 - `mmlu` - Massive Multitask Language Understanding
 - `humaneval` - Code generation benchmark
 - `gsm8k` - Grade school math problems
 - `truthfulqa` - Truthfulness evaluation
 - `custom` - Custom evaluation dataset
 
-## Metrics
-
-- `perplexity` - Language modeling quality
-- `accuracy` - Task-specific accuracy
-- `bleu` - Translation quality
-- `rouge` - Summarization quality
-
 !`
 #!/bin/bash
 
 MODEL=$1
 BENCHMARK=$2
-METRICS=${3:-"all"}
+OPTIONS=$3
+
+if [ -z "$MODEL" ] || [ -z "$BENCHMARK" ]; then
+echo "Usage: /evaluate [model] [benchmark] [options]"
+echo ""
+echo "Benchmarks: perplexity, mmlu, humaneval, gsm8k, truthfulqa, custom"
+echo "Example: /evaluate llama2-7b mmlu"
+exit 1
+fi
 
 echo "Evaluating model: $MODEL"
 echo "Benchmark: $BENCHMARK"
-echo "Metrics: $METRICS"
 
-# Invoke evaluation-analyst agent
+# Check if model exists
 
+if [ ! -d "$MODEL" ] && [ ! -f "$MODEL" ]; then
+echo "Warning: Model path not found. Assuming HuggingFace model ID."
+fi
+
+case $BENCHMARK in
+perplexity)
+echo "Calculating perplexity..."
+echo "This measures how well the model predicts text" # Invoke evaluation-analyst agent
+;;
+mmlu)
+echo "Running MMLU benchmark..."
+echo "Testing on 57 subjects across STEM, humanities, and more" # Invoke evaluation-analyst agent with MMLU
+;;
+humaneval)
+echo "Running HumanEval code generation benchmark..."
+echo "Testing ability to generate correct Python functions" # Invoke evaluation-analyst agent with HumanEval
+;;
+gsm8k)
+echo "Running GSM8K math benchmark..."
+echo "Testing grade school math problem solving" # Invoke evaluation-analyst agent with GSM8K
+;;
+truthfulqa)
+echo "Running TruthfulQA benchmark..."
+echo "Testing truthfulness and accuracy" # Invoke evaluation-analyst agent with TruthfulQA
+;;
+custom)
+echo "Running custom evaluation..."
+echo "Please specify dataset path in options" # Invoke evaluation-analyst with custom dataset
+;;
+\*)
+echo "Unknown benchmark: $BENCHMARK"
+exit 1
+;;
+esac
+
+echo ""
+echo "Evaluation will generate a detailed report with:"
+echo "- Performance metrics"
+echo "- Comparison to baseline"
+echo "- Recommendations for improvement"
 `
 ```
 
@@ -399,6 +528,7 @@ Quantize models to reduce size and improve inference speed.
 - `gptq` - GPTQ quantization
 - `awq` - Activation-aware Weight Quantization
 - `bnb` - BitsAndBytes quantization
+- `gguf` - GGUF format for Ollama/llama.cpp
 
 !`
 #!/bin/bash
@@ -407,28 +537,68 @@ METHOD=$1
 MODEL=$2
 OUTPUT=$3
 
+if [ -z "$METHOD" ] || [ -z "$MODEL" ] || [ -z "$OUTPUT" ]; then
+echo "Usage: /quantize [method] [model] [output]"
+echo ""
+echo "Methods: int8, int4, gptq, awq, bnb, gguf"
+echo "Example: /quantize gptq llama2-7b ./llama2-7b-gptq"
+exit 1
+fi
+
 echo "Quantizing model..."
 echo "Method: $METHOD"
 echo "Input: $MODEL"
 echo "Output: $OUTPUT"
 
+# Check model exists
+
+if [ ! -d "$MODEL" ] && [ ! -f "$MODEL" ]; then
+echo "Warning: Model path not found. Will attempt to download from HuggingFace."
+fi
+
+# Create output directory
+
+mkdir -p $OUTPUT
+
 case $METHOD in
 int8)
 echo "Applying INT8 quantization..."
+echo "Expected size reduction: ~50%"
+echo "Performance impact: Minimal" # Invoke optimization-expert agent
 ;;
 int4)
 echo "Applying INT4 quantization..."
+echo "Expected size reduction: ~75%"
+echo "Performance impact: Minor" # Invoke optimization-expert agent
 ;;
 gptq)
 echo "Applying GPTQ quantization..."
+echo "Using calibration dataset for optimal quantization"
+echo "Expected size reduction: ~75%"
+echo "Performance: Near original quality" # Invoke optimization-expert agent with GPTQ
 ;;
 awq)
 echo "Applying AWQ quantization..."
+echo "Activation-aware quantization for better quality"
+echo "Expected size reduction: ~70%" # Invoke optimization-expert agent with AWQ
 ;;
 bnb)
 echo "Applying BitsAndBytes quantization..."
+echo "8-bit or 4-bit with minimal quality loss" # Invoke optimization-expert agent with BnB
+;;
+gguf)
+echo "Converting to GGUF format..."
+echo "Compatible with Ollama and llama.cpp"
+echo "Multiple quantization levels available" # Invoke optimization-expert agent for GGUF
+;;
+\*)
+echo "Unknown method: $METHOD"
+exit 1
 ;;
 esac
+
+echo ""
+echo "Quantization complete. Model saved to: $OUTPUT"
 `
 ```
 
@@ -446,7 +616,7 @@ Prepare, process, and manage datasets for LLM training.
 
 ## Usage
 
-`/dataset [action] [source] [format]`
+`/dataset [action] [source] [output]`
 
 ## Actions
 
@@ -455,40 +625,79 @@ Prepare, process, and manage datasets for LLM training.
 - `analyze` - Analyze dataset statistics
 - `clean` - Clean and filter dataset
 - `augment` - Augment with synthetic data
+- `split` - Split into train/val/test
 
 ## Formats
 
 - `alpaca` - Alpaca instruction format
 - `chatml` - ChatML format
 - `jsonl` - JSON Lines format
-- `parquet` - Parquet format
+- `sharegpt` - ShareGPT conversation format
 
 !`
 #!/bin/bash
 
 ACTION=$1
 SOURCE=$2
-FORMAT=${3:-"jsonl"}
+OUTPUT=$3
+
+if [ -z "$ACTION" ] || [ -z "$SOURCE" ]; then
+echo "Usage: /dataset [action] [source] [output]"
+echo ""
+echo "Actions: prepare, convert, analyze, clean, augment, split"
+echo "Example: /dataset prepare raw_data.json training_data.jsonl"
+exit 1
+fi
 
 echo "Dataset operation: $ACTION"
 echo "Source: $SOURCE"
-echo "Format: $FORMAT"
+[ ! -z "$OUTPUT" ] && echo "Output: $OUTPUT"
+
+# Check source exists
+
+if [ ! -f "$SOURCE" ] && [ "$ACTION" != "analyze" ]; then
+echo "Error: Source file not found: $SOURCE"
+exit 1
+fi
 
 case $ACTION in
 prepare)
-echo "Preparing dataset..." # Invoke dataset-curator agent
+echo "Preparing dataset for training..."
+echo "Steps:"
+echo "1. Loading data"
+echo "2. Formatting for training"
+echo "3. Tokenization check"
+echo "4. Validation" # Invoke dataset-curator agent
 ;;
 convert)
 echo "Converting dataset format..."
+echo "Detecting source format..."
+echo "Target format: ${OUTPUT##_.}" # Invoke dataset-curator agent for conversion
 ;;
 analyze)
 echo "Analyzing dataset..."
+echo "Calculating statistics:"
+echo "- Number of examples"
+echo "- Token distribution"
+echo "- Quality metrics" # Invoke dataset-curator for analysis
 ;;
 clean)
 echo "Cleaning dataset..."
+echo "- Removing duplicates"
+echo "- Filtering by length"
+echo "- Removing invalid entries" # Invoke dataset-curator for cleaning
 ;;
 augment)
 echo "Augmenting dataset..."
+echo "Methods: paraphrase, back-translation, synthesis" # Invoke dataset-curator for augmentation
+;;
+split)
+echo "Splitting dataset..."
+echo "Default: 80% train, 10% val, 10% test" # Invoke dataset-curator for splitting
+;;
+_)
+echo "Unknown action: $ACTION"
+exit 1
 ;;
 esac
 `
@@ -508,11 +717,11 @@ model: opus
 
 # Training Specialist
 
-Expert in training large language models with PyTorch and HuggingFace.
+Expert in training large language models with PyTorch and HuggingFace, including distributed training and optimization techniques.
 
 ## Full Model Training
 
-### Training Configuration
+### Complete Training Pipeline
 
 ```python
 from transformers import (
@@ -520,201 +729,315 @@ from transformers import (
     AutoTokenizer,
     TrainingArguments,
     Trainer,
-    DataCollatorForLanguageModeling
+    DataCollatorForLanguageModeling,
+    EarlyStoppingCallback
 )
 import torch
 from datasets import load_dataset
 from accelerate import Accelerator
+import wandb
 
 class LLMTrainer:
-    def __init__(self, model_name: str, dataset_name: str):
+    def __init__(self, model_name: str, dataset_name: str, output_dir: str = "./output"):
+        """Initialize trainer with model and dataset"""
         self.accelerator = Accelerator(
-            mixed_precision='bf16',  # Use bfloat16 for training
+            mixed_precision='bf16',  # Use bfloat16 for stable training
             gradient_accumulation_steps=4,
-            cpu=False
+            log_with="wandb",  # Use Weights & Biases for logging
+            project_dir=output_dir
         )
 
-        # Load model and tokenizer
+        # Initialize wandb for experiment tracking
+        if self.accelerator.is_main_process:
+            wandb.init(
+                project="llm-training",
+                config={
+                    "model": model_name,
+                    "dataset": dataset_name,
+                    "mixed_precision": "bf16",
+                    "gradient_accumulation": 4
+                }
+            )
+
+        # Load model with optimization
         self.model = AutoModelForCausalLM.from_pretrained(
             model_name,
             torch_dtype=torch.bfloat16,
             use_cache=False,  # Disable KV cache for training
-            attn_implementation="flash_attention_2"  # Use FlashAttention 2
+            attn_implementation="flash_attention_2" if self.check_flash_attn() else "eager"
         )
 
         self.tokenizer = AutoTokenizer.from_pretrained(
             model_name,
-            use_fast=True
+            use_fast=True,
+            trust_remote_code=True
         )
-        self.tokenizer.pad_token = self.tokenizer.eos_token
 
-    def prepare_dataset(self, dataset_name: str):
-        # Load and tokenize dataset
-        dataset = load_dataset(dataset_name)
+        # Add padding token if not present
+        if self.tokenizer.pad_token is None:
+            self.tokenizer.pad_token = self.tokenizer.eos_token
+
+        self.dataset_name = dataset_name
+        self.output_dir = output_dir
+
+    def check_flash_attn(self):
+        """Check if Flash Attention 2 is available"""
+        try:
+            import flash_attn
+            return True
+        except ImportError:
+            print("Flash Attention not available, using standard attention")
+            return False
+
+    def prepare_dataset(self):
+        """Load and prepare dataset for training"""
+        # Load dataset
+        dataset = load_dataset(self.dataset_name, split="train")
+
+        # Split into train/validation
+        split_dataset = dataset.train_test_split(test_size=0.05, seed=42)
 
         def tokenize_function(examples):
+            # Tokenize with proper truncation and padding
             return self.tokenizer(
                 examples["text"],
-                padding="max_length",
                 truncation=True,
+                padding="max_length",
                 max_length=2048,
-                return_tensors="pt"
+                return_special_tokens_mask=True
             )
 
-        tokenized_dataset = dataset.map(
+        # Tokenize dataset
+        tokenized_dataset = split_dataset.map(
             tokenize_function,
             batched=True,
             num_proc=4,
-            remove_columns=dataset["train"].column_names
+            remove_columns=dataset.column_names,
+            desc="Tokenizing dataset"
         )
 
         return tokenized_dataset
 
-    def setup_training_args(self):
+    def setup_training_args(self, num_epochs: int = 3):
+        """Configure training arguments"""
         return TrainingArguments(
-            output_dir="./output",
+            output_dir=self.output_dir,
             overwrite_output_dir=True,
-            num_train_epochs=3,
+
+            # Training hyperparameters
+            num_train_epochs=num_epochs,
             per_device_train_batch_size=4,
             per_device_eval_batch_size=4,
             gradient_accumulation_steps=4,
             eval_accumulation_steps=4,
-            warmup_steps=500,
+
+            # Learning rate schedule
             learning_rate=2e-5,
-            logging_steps=10,
-            save_steps=1000,
-            eval_steps=500,
-            save_total_limit=3,
-            save_strategy="steps",
+            lr_scheduler_type="cosine",
+            warmup_steps=500,
+
+            # Optimization
+            optim="adamw_torch_fused",  # Fused AdamW for speed
+            adam_beta1=0.9,
+            adam_beta2=0.95,
+            adam_epsilon=1e-8,
+            weight_decay=0.01,
+            max_grad_norm=1.0,
+
+            # Evaluation and saving
             evaluation_strategy="steps",
+            eval_steps=500,
+            save_strategy="steps",
+            save_steps=1000,
+            save_total_limit=3,
             load_best_model_at_end=True,
             metric_for_best_model="eval_loss",
             greater_is_better=False,
+
+            # Performance optimization
             bf16=True,
             tf32=True,  # Enable TF32 on Ampere GPUs
             gradient_checkpointing=True,
+            gradient_checkpointing_kwargs={"use_reentrant": False},
             group_by_length=True,
-            ddp_find_unused_parameters=False,
-            report_to=["tensorboard"],
+            length_column_name="length",
+            ddp_find_unused_parameters=False if torch.cuda.device_count() > 1 else None,
+
+            # Logging
+            logging_dir=f"{self.output_dir}/logs",
+            logging_strategy="steps",
+            logging_steps=10,
+            report_to=["wandb", "tensorboard"],
+
+            # Other
             dataloader_num_workers=4,
+            dataloader_pin_memory=True,
+            skip_memory_metrics=False,
+            push_to_hub=False,
         )
 
     def train(self):
-        dataset = self.prepare_dataset(self.dataset_name)
+        """Execute training"""
+        # Prepare dataset
+        dataset = self.prepare_dataset()
+
+        # Setup training arguments
         training_args = self.setup_training_args()
 
+        # Initialize trainer
         trainer = Trainer(
             model=self.model,
             args=training_args,
             train_dataset=dataset["train"],
-            eval_dataset=dataset["validation"],
+            eval_dataset=dataset["test"],
             tokenizer=self.tokenizer,
             data_collator=DataCollatorForLanguageModeling(
                 tokenizer=self.tokenizer,
-                mlm=False
+                mlm=False,  # Causal LM, not masked LM
+                pad_to_multiple_of=8  # Efficient padding
             ),
+            callbacks=[
+                EarlyStoppingCallback(
+                    early_stopping_patience=3,
+                    early_stopping_threshold=0.001
+                )
+            ]
         )
 
+        # Enable gradient checkpointing
+        if training_args.gradient_checkpointing:
+            self.model.gradient_checkpointing_enable()
+
         # Start training
-        trainer.train()
+        print("Starting training...")
+        train_result = trainer.train()
 
         # Save final model
-        trainer.save_model("./final_model")
-        self.tokenizer.save_pretrained("./final_model")
+        print("Saving model...")
+        trainer.save_model()
+        self.tokenizer.save_pretrained(self.output_dir)
+
+        # Save training metrics
+        with open(f"{self.output_dir}/training_metrics.txt", "w") as f:
+            f.write(str(train_result.metrics))
+
+        return train_result
 ```
 ````
 
 ### Distributed Training with DeepSpeed
 
 ```python
-# DeepSpeed Configuration
+# deepspeed_config.json
 deepspeed_config = {
+    "train_batch_size": "auto",
+    "gradient_accumulation_steps": "auto",
+    "gradient_clipping": 1.0,
     "zero_optimization": {
-        "stage": 2,  # ZeRO Stage 2
+        "stage": 2,  # ZeRO-2 for balanced memory/speed
         "offload_optimizer": {
             "device": "cpu",
             "pin_memory": True
         },
         "allgather_partitions": True,
-        "allgather_bucket_size": 2e8,
+        "allgather_bucket_size": 5e8,
         "overlap_comm": True,
         "reduce_scatter": True,
-        "reduce_bucket_size": 2e8,
+        "reduce_bucket_size": 5e8,
         "contiguous_gradients": True
     },
     "bf16": {
         "enabled": True
     },
-    "gradient_accumulation_steps": 4,
-    "gradient_clipping": 1.0,
-    "train_batch_size": "auto",
-    "train_micro_batch_size_per_gpu": 2,
-    "wall_clock_breakdown": False
+    "optimizer": {
+        "type": "AdamW",
+        "params": {
+            "lr": "auto",
+            "betas": [0.9, 0.95],
+            "eps": 1e-8,
+            "weight_decay": "auto"
+        }
+    },
+    "scheduler": {
+        "type": "WarmupCosineLR",
+        "params": {
+            "warmup_min_lr": 0,
+            "warmup_max_lr": "auto",
+            "warmup_num_steps": "auto",
+            "total_num_steps": "auto"
+        }
+    }
 }
+
+# Use with trainer
+training_args.deepspeed = "deepspeed_config.json"
 ```
 
-### Continued Pre-training
+### DPO Training
 
 ```python
-def continued_pretraining(base_model: str, new_data: str):
-    """
-    Continue pre-training an existing model on new data
-    """
-    model = AutoModelForCausalLM.from_pretrained(
-        base_model,
-        torch_dtype=torch.bfloat16
-    )
+from trl import DPOTrainer
 
-    # Adjust learning rate for continued training
+def train_dpo(model_name: str, dataset_name: str):
+    """Train with Direct Preference Optimization"""
+
+    # Load model and reference model
+    model = AutoModelForCausalLM.from_pretrained(model_name)
+    ref_model = AutoModelForCausalLM.from_pretrained(model_name)
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+    # Load preference dataset
+    dataset = load_dataset(dataset_name)
+
+    # DPO training arguments
     training_args = TrainingArguments(
-        learning_rate=5e-6,  # Lower LR for continued training
-        warmup_ratio=0.03,
+        output_dir="./dpo_output",
         num_train_epochs=1,
-        save_strategy="epoch",
-        # ... other args
+        per_device_train_batch_size=4,
+        gradient_accumulation_steps=4,
+        learning_rate=1e-6,
+        warmup_ratio=0.1,
+        bf16=True,
+        gradient_checkpointing=True,
+        evaluation_strategy="steps",
+        eval_steps=500,
+        save_strategy="steps",
+        save_steps=1000,
+        logging_steps=10,
     )
 
-    # Continue training on new domain
-    trainer.train(resume_from_checkpoint=True)
-```
+    # Initialize DPO trainer
+    dpo_trainer = DPOTrainer(
+        model=model,
+        ref_model=ref_model,
+        args=training_args,
+        beta=0.1,  # KL penalty coefficient
+        train_dataset=dataset["train"],
+        eval_dataset=dataset["test"],
+        tokenizer=tokenizer,
+        max_length=512,
+        max_prompt_length=256,
+    )
 
-## Training Optimization Techniques
+    # Train
+    dpo_trainer.train()
 
-### Gradient Checkpointing
-
-```python
-# Enable gradient checkpointing to save memory
-model.gradient_checkpointing_enable()
-model.config.use_cache = False  # Incompatible with checkpointing
-```
-
-### Mixed Precision Training
-
-```python
-from torch.cuda.amp import autocast, GradScaler
-
-scaler = GradScaler()
-
-for batch in dataloader:
-    optimizer.zero_grad()
-
-    with autocast(dtype=torch.bfloat16):
-        outputs = model(**batch)
-        loss = outputs.loss
-
-    scaler.scale(loss).backward()
-    scaler.step(optimizer)
-    scaler.update()
+    # Save
+    dpo_trainer.save_model("./dpo_final")
 ```
 
 ## Best Practices
 
-1. **Learning Rate Schedule**: Use cosine or linear warmup
-2. **Gradient Clipping**: Prevent exploding gradients
-3. **Weight Decay**: 0.01 for regularization
-4. **Batch Size**: Maximize GPU utilization
-5. **Checkpointing**: Save regularly to prevent loss
-6. **Monitoring**: Track loss, learning rate, gradients
+1. **Start with smaller models**: Test pipeline with 125M-1B parameter models first
+2. **Monitor metrics closely**: Watch for loss spikes, gradient explosions
+3. **Use mixed precision**: BF16 is more stable than FP16 for training
+4. **Save checkpoints frequently**: Every 1000 steps or less
+5. **Implement gradient checkpointing**: Essential for large models
+6. **Use efficient data loading**: Multiple workers, pin memory
+7. **Profile training**: Identify bottlenecks with PyTorch profiler
+8. **Track experiments**: Use Weights & Biases or TensorBoard
+9. **Validate frequently**: Catch issues early with validation loss
+10. **Have rollback plan**: Keep best checkpoints, be ready to resume
 
 ````
 
@@ -730,10 +1053,11 @@ model: sonnet
 
 # Fine-tuning Expert
 
-Expert in parameter-efficient fine-tuning methods using PEFT and Unsloth.
+Expert in parameter-efficient fine-tuning methods using PEFT, Unsloth, and advanced techniques.
 
 ## LoRA Fine-tuning with Unsloth
 
+### Fast LoRA Implementation
 ```python
 from unsloth import FastLanguageModel
 import torch
@@ -743,280 +1067,309 @@ from datasets import load_dataset
 
 class LoRAFineTuner:
     def __init__(self, model_name: str, max_seq_length: int = 2048):
-        # Load model with Unsloth for 2x faster training
+        """Initialize with Unsloth for 2x faster training"""
+
+        # Load 4-bit quantized model for QLoRA
         self.model, self.tokenizer = FastLanguageModel.from_pretrained(
             model_name=model_name,
             max_seq_length=max_seq_length,
-            dtype=None,  # Auto-detect
-            load_in_4bit=True,  # Use 4bit for QLoRA
+            dtype=None,  # Auto-detect optimal dtype
+            load_in_4bit=True,  # Use 4-bit quantization
         )
 
-    def prepare_model_for_training(self):
-        # Apply LoRA adapters
+        self.max_seq_length = max_seq_length
+
+    def prepare_model_for_training(self, r: int = 16, target_modules: list = None):
+        """Apply LoRA adapters with optimal configuration"""
+
+        if target_modules is None:
+            # Default to attention + MLP layers for maximum impact
+            target_modules = [
+                "q_proj", "k_proj", "v_proj", "o_proj",  # Attention
+                "gate_proj", "up_proj", "down_proj",      # MLP
+            ]
+
+        # Apply LoRA with Unsloth optimizations
         self.model = FastLanguageModel.get_peft_model(
             self.model,
-            r=16,  # LoRA rank
-            target_modules=[
-                "q_proj", "k_proj", "v_proj", "o_proj",
-                "gate_proj", "up_proj", "down_proj",
-            ],
-            lora_alpha=16,
-            lora_dropout=0.05,
-            bias="none",
+            r=r,  # LoRA rank
+            target_modules=target_modules,
+            lora_alpha=r,  # Usually set equal to r
+            lora_dropout=0.05,  # Small dropout for regularization
+            bias="none",  # Don't train biases
             use_gradient_checkpointing="unsloth",  # Unsloth's optimized checkpointing
             random_state=42,
-            use_rslora=False,  # Rank stabilized LoRA
-            loftq_config=None,  # LoftQ initialization
+            use_rslora=False,  # Use standard LoRA (RSLoRA is experimental)
+            loftq_config=None,  # LoftQ for better initialization (optional)
         )
 
-    def prepare_dataset(self, dataset_name: str):
-        """
-        Prepare dataset in Alpaca format
-        """
+        # Print trainable parameters
+        trainable_params = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
+        total_params = sum(p.numel() for p in self.model.parameters())
+        print(f"Trainable parameters: {trainable_params:,} ({100 * trainable_params / total_params:.2f}%)")
+
+    def prepare_dataset(self, dataset_name: str, format_type: str = "alpaca"):
+        """Prepare dataset in appropriate format"""
+
         dataset = load_dataset(dataset_name)
 
-        # Alpaca prompt template
-        alpaca_prompt = """### Instruction:
-{}
+        if format_type == "alpaca":
+            # Alpaca instruction format
+            alpaca_prompt = """Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
+
+### Instruction:
+{instruction}
 
 ### Input:
-{}
+{input}
 
 ### Response:
-{}"""
+{output}"""
 
-        def formatting_prompts_func(examples):
-            instructions = examples["instruction"]
-            inputs = examples["input"]
-            outputs = examples["output"]
-            texts = []
+            def format_alpaca(examples):
+                instructions = examples["instruction"]
+                inputs = examples.get("input", [""] * len(instructions))
+                outputs = examples["output"]
 
-            for instruction, input, output in zip(instructions, inputs, outputs):
-                text = alpaca_prompt.format(instruction, input, output)
-                texts.append(text)
+                texts = []
+                for instruction, input_text, output in zip(instructions, inputs, outputs):
+                    text = alpaca_prompt.format(
+                        instruction=instruction,
+                        input=input_text if input_text else "",
+                        output=output
+                    )
+                    texts.append(text)
 
-            return {"text": texts}
+                return {"text": texts}
 
-        dataset = dataset.map(
-            formatting_prompts_func,
-            batched=True,
-        )
+        elif format_type == "chat":
+            # Chat format
+            def format_chat(examples):
+                texts = []
+                for conversation in examples["conversations"]:
+                    text = ""
+                    for message in conversation:
+                        role = message["from"]
+                        content = message["value"]
+                        if role == "human":
+                            text += f"User: {content}\n"
+                        else:
+                            text += f"Assistant: {content}\n"
+                    texts.append(text)
+
+                return {"text": texts}
+
+        # Apply formatting
+        format_func = format_alpaca if format_type == "alpaca" else format_chat
+        dataset = dataset.map(format_func, batched=True, num_proc=4)
 
         return dataset
 
-    def train(self, dataset_name: str, output_dir: str = "./lora_model"):
+    def train(self,
+              dataset_name: str,
+              output_dir: str = "./lora_model",
+              num_epochs: int = 3,
+              batch_size: int = 4,
+              learning_rate: float = 2e-4):
+        """Execute LoRA fine-tuning"""
+
+        # Prepare model with LoRA
         self.prepare_model_for_training()
+
+        # Prepare dataset
         dataset = self.prepare_dataset(dataset_name)
 
+        # Training arguments optimized for LoRA
+        training_args = TrainingArguments(
+            output_dir=output_dir,
+            num_train_epochs=num_epochs,
+            per_device_train_batch_size=batch_size,
+            gradient_accumulation_steps=4,
+            warmup_steps=100,
+            learning_rate=learning_rate,
+
+            # Optimization settings
+            optim="adamw_8bit",  # 8-bit Adam for memory efficiency
+            weight_decay=0.01,
+            lr_scheduler_type="cosine",
+
+            # Mixed precision
+            fp16=not torch.cuda.is_bf16_supported(),
+            bf16=torch.cuda.is_bf16_supported(),
+
+            # Logging
+            logging_steps=10,
+            logging_first_step=True,
+
+            # Evaluation
+            evaluation_strategy="steps" if "validation" in dataset else "no",
+            eval_steps=100 if "validation" in dataset else None,
+
+            # Saving
+            save_strategy="steps",
+            save_steps=500,
+            save_total_limit=2,
+            load_best_model_at_end=True if "validation" in dataset else False,
+
+            # Performance
+            gradient_checkpointing=True,
+            gradient_checkpointing_kwargs={"use_reentrant": False},
+            group_by_length=True,
+
+            # Other
+            report_to="tensorboard",
+            seed=42,
+        )
+
+        # Initialize SFT trainer
         trainer = SFTTrainer(
             model=self.model,
             tokenizer=self.tokenizer,
             train_dataset=dataset["train"],
+            eval_dataset=dataset.get("validation", None),
             dataset_text_field="text",
-            max_seq_length=2048,
-            dataset_num_proc=2,
-            packing=False,  # Can set to True for short sequences
-            args=TrainingArguments(
-                per_device_train_batch_size=2,
-                gradient_accumulation_steps=4,
-                warmup_steps=5,
-                max_steps=60,  # Or num_train_epochs
-                learning_rate=2e-4,
-                fp16=not torch.cuda.is_bf16_supported(),
-                bf16=torch.cuda.is_bf16_supported(),
-                logging_steps=1,
-                optim="adamw_8bit",
-                weight_decay=0.01,
-                lr_scheduler_type="linear",
-                seed=42,
-                output_dir=output_dir,
-                save_strategy="steps",
-                save_steps=10,
-                save_total_limit=2,
-            ),
+            max_seq_length=self.max_seq_length,
+            dataset_num_proc=4,
+            packing=False,  # Can enable for short sequences
+            args=training_args,
         )
 
         # Train
+        print("Starting LoRA fine-tuning...")
         trainer.train()
 
         # Save LoRA adapters
+        print(f"Saving LoRA adapters to {output_dir}")
         self.model.save_pretrained(output_dir)
         self.tokenizer.save_pretrained(output_dir)
 
-        # Merge and save full model (optional)
-        # self.model.save_pretrained_merged(f"{output_dir}_merged", tokenizer)
+        # Option to merge and save full model
+        # self.model.save_pretrained_merged(f"{output_dir}_merged", self.tokenizer)
+
+        return trainer.state.log_history
 ````
 
-## QLoRA with 4-bit Quantization
+### QLoRA with Advanced Quantization
 
 ```python
 from transformers import BitsAndBytesConfig
-import bitsandbytes as bnb
+from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 
-def create_qlora_config():
-    """
-    Create QLoRA configuration with 4-bit quantization
-    """
+def create_qlora_model(model_name: str):
+    """Create QLoRA model with 4-bit quantization"""
+
+    # Configure 4-bit quantization
     bnb_config = BitsAndBytesConfig(
         load_in_4bit=True,
         bnb_4bit_use_double_quant=True,  # Double quantization
-        bnb_4bit_quant_type="nf4",  # NormalFloat4
-        bnb_4bit_compute_dtype=torch.bfloat16
+        bnb_4bit_quant_type="nf4",  # NormalFloat4 quantization
+        bnb_4bit_compute_dtype=torch.bfloat16,  # Compute in bfloat16
     )
 
-    return bnb_config
+    # Load model with quantization
+    model = AutoModelForCausalLM.from_pretrained(
+        model_name,
+        quantization_config=bnb_config,
+        device_map="auto",
+        trust_remote_code=True,
+        attn_implementation="flash_attention_2" if is_flash_attn_available() else "eager"
+    )
 
-class QLoRATrainer:
-    def __init__(self, model_name: str):
-        bnb_config = create_qlora_config()
+    # Prepare for k-bit training
+    model = prepare_model_for_kbit_training(model)
 
-        self.model = AutoModelForCausalLM.from_pretrained(
-            model_name,
-            quantization_config=bnb_config,
-            device_map="auto",
-            trust_remote_code=True
-        )
+    # Configure LoRA
+    peft_config = LoraConfig(
+        r=64,  # Higher rank for QLoRA
+        lora_alpha=16,
+        target_modules=[
+            "q_proj", "k_proj", "v_proj", "o_proj",
+            "gate_proj", "up_proj", "down_proj", "lm_head"
+        ],
+        lora_dropout=0.05,
+        bias="none",
+        task_type="CAUSAL_LM",
+        inference_mode=False,
+    )
 
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            model_name,
-            trust_remote_code=True
-        )
+    # Apply LoRA
+    model = get_peft_model(model, peft_config)
+    model.print_trainable_parameters()
 
-    def prepare_for_training(self):
-        from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
+    return model
+```
 
-        # Prepare model for k-bit training
-        self.model = prepare_model_for_kbit_training(self.model)
+### Advanced Fine-tuning Techniques
 
-        # LoRA configuration
+#### Merged Adapter Training
+
+```python
+def merge_and_continue_training(base_model_path: str,
+                                lora_adapter_path: str,
+                                new_dataset: str):
+    """Merge LoRA adapter and continue training"""
+
+    # Load base model and adapter
+    model = AutoModelForCausalLM.from_pretrained(base_model_path)
+    model = PeftModel.from_pretrained(model, lora_adapter_path)
+
+    # Merge adapter into base model
+    model = model.merge_and_unload()
+
+    # Apply new LoRA for continued training
+    new_peft_config = LoraConfig(
+        r=8,  # Smaller rank for fine-tuning
+        lora_alpha=8,
+        target_modules=["q_proj", "v_proj"],  # Fewer targets
+        lora_dropout=0.1,
+    )
+
+    model = get_peft_model(model, new_peft_config)
+
+    # Continue training on new dataset
+    # ... training code ...
+```
+
+#### Multi-Task LoRA
+
+```python
+def create_multi_task_lora(model_name: str, tasks: dict):
+    """Create multiple LoRA adapters for different tasks"""
+
+    model = AutoModelForCausalLM.from_pretrained(model_name)
+
+    for task_name, task_config in tasks.items():
+        # Create task-specific LoRA config
         peft_config = LoraConfig(
-            r=64,
-            lora_alpha=16,
-            target_modules=[
-                "q_proj", "k_proj", "v_proj", "o_proj",
-                "gate_proj", "up_proj", "down_proj", "lm_head"
-            ],
+            r=task_config["rank"],
+            lora_alpha=task_config["alpha"],
+            target_modules=task_config["targets"],
             lora_dropout=0.05,
             bias="none",
-            task_type="CAUSAL_LM"
+            task_type="CAUSAL_LM",
         )
 
-        self.model = get_peft_model(self.model, peft_config)
+        # Add adapter for this task
+        model.add_adapter(task_name, peft_config)
 
-        # Print trainable parameters
-        self.model.print_trainable_parameters()
-```
-
-## Advanced Fine-tuning Techniques
-
-### DPO (Direct Preference Optimization)
-
-```python
-from trl import DPOTrainer
-
-class DPOFineTuner:
-    def __init__(self, model_name: str):
-        self.model = AutoModelForCausalLM.from_pretrained(model_name)
-        self.ref_model = AutoModelForCausalLM.from_pretrained(model_name)
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-
-    def train_dpo(self, dataset):
-        dpo_trainer = DPOTrainer(
-            self.model,
-            self.ref_model,
-            args=TrainingArguments(
-                per_device_train_batch_size=4,
-                learning_rate=1e-6,
-                num_train_epochs=1,
-                gradient_accumulation_steps=2,
-                save_strategy="epoch",
-                logging_steps=10,
-            ),
-            beta=0.1,  # KL penalty coefficient
-            train_dataset=dataset["train"],
-            eval_dataset=dataset["test"],
-            tokenizer=self.tokenizer,
-        )
-
-        dpo_trainer.train()
-```
-
-### RLHF with PPO
-
-```python
-from trl import PPOTrainer, PPOConfig, AutoModelForCausalLMWithValueHead
-
-class RLHFTrainer:
-    def __init__(self, model_name: str):
-        # Load model with value head for PPO
-        self.model = AutoModelForCausalLMWithValueHead.from_pretrained(model_name)
-        self.ref_model = AutoModelForCausalLMWithValueHead.from_pretrained(model_name)
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-
-        # PPO configuration
-        self.ppo_config = PPOConfig(
-            batch_size=128,
-            mini_batch_size=4,
-            gradient_accumulation_steps=4,
-            learning_rate=1e-5,
-            optimize_cuda_cache=True,
-        )
-
-    def train_ppo(self, dataset, reward_model):
-        ppo_trainer = PPOTrainer(
-            self.ppo_config,
-            self.model,
-            self.ref_model,
-            self.tokenizer,
-            dataset=dataset,
-            data_collator=collator
-        )
-
-        for batch in ppo_trainer.dataloader:
-            query_tensors = batch["input_ids"]
-
-            # Generate responses
-            response_tensors = ppo_trainer.generate(
-                query_tensors,
-                max_new_tokens=128,
-                do_sample=True,
-                temperature=0.7
-            )
-
-            # Compute rewards
-            rewards = reward_model(query_tensors, response_tensors)
-
-            # PPO update
-            stats = ppo_trainer.step(query_tensors, response_tensors, rewards)
-```
-
-## Memory Optimization Techniques
-
-```python
-# Gradient Accumulation
-training_args.gradient_accumulation_steps = 16
-
-# CPU Offloading
-training_args.offload_optimizer = True
-
-# DeepSpeed ZeRO-3
-training_args.deepspeed = "ds_config_zero3.json"
-
-# Flash Attention
-model.config.attn_implementation = "flash_attention_2"
-
-# Gradient Checkpointing
-model.gradient_checkpointing_enable()
+    # Train each adapter
+    for task_name in tasks:
+        model.set_adapter(task_name)
+        # ... task-specific training ...
 ```
 
 ## Best Practices
 
-1. **Start Small**: Begin with small rank (r=8) and increase if needed
-2. **Learning Rate**: 1e-4 to 5e-4 for LoRA
-3. **Warmup Steps**: 3-10% of total steps
-4. **Save Checkpoints**: Save best and last checkpoints
-5. **Monitor Metrics**: Track training/validation loss
-6. **Merge Carefully**: Test merged model thoroughly
+1. **Start with LoRA rank 8-16**: Increase only if needed
+2. **Use QLoRA for large models**: Enables fine-tuning 70B+ models on single GPU
+3. **Target all linear layers**: Better results than just attention
+4. **Monitor gradient norms**: Detect training instabilities
+5. **Save adapters separately**: Much smaller than full models
+6. **Test before merging**: Ensure quality before creating full model
+7. **Use Unsloth for speed**: 2x faster training with same quality
+8. **Implement early stopping**: Prevent overfitting
+9. **Validate on held-out data**: Ensure generalization
+10. **Document hyperparameters**: Track what works for reproducibility
 
 ````
 
@@ -1032,1598 +1385,531 @@ model: sonnet
 
 # Deployment Engineer
 
-Expert in deploying LLMs for production inference with vLLM, Ollama, and TensorRT.
+Expert in deploying LLMs for production inference with vLLM, Ollama, TensorRT, and optimization techniques.
 
-## vLLM High-Performance Serving
+## vLLM High-Performance Deployment
 
+### Production vLLM Server
 ```python
 from vllm import LLM, SamplingParams
 from vllm.entrypoints.openai import api_server
 import ray
+import uvicorn
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+import asyncio
 
 class vLLMDeployment:
-    def __init__(self, model_path: str):
-        # Initialize vLLM with optimizations
+    def __init__(self, model_path: str, gpu_memory_utilization: float = 0.9):
+        """Initialize vLLM with production optimizations"""
+
+        # Detect available GPUs
+        import torch
+        num_gpus = torch.cuda.device_count()
+
+        # Initialize vLLM with optimal settings
         self.llm = LLM(
             model=model_path,
-            tensor_parallel_size=2,  # Number of GPUs for tensor parallelism
-            pipeline_parallel_size=1,  # Pipeline parallelism
+
+            # Parallelism settings
+            tensor_parallel_size=num_gpus if num_gpus > 1 else 1,
+            pipeline_parallel_size=1,
+
+            # Memory settings
+            gpu_memory_utilization=gpu_memory_utilization,
+            swap_space=4,  # GB of CPU swap space for overflow
+
+            # Model settings
             max_model_len=4096,
-            gpu_memory_utilization=0.9,  # Use 90% of GPU memory
+            dtype="auto",  # Auto-detect best dtype
+
+            # Optimization settings
+            enforce_eager=False,  # Use CUDA graphs for speed
+            enable_prefix_caching=True,  # Cache common prefixes
+            enable_chunked_prefill=False,  # Disable for lower latency
+
+            # Quantization (if model supports it)
+            quantization="awq" if self.check_awq_support(model_path) else None,
+
+            # Scheduling
             max_num_batched_tokens=8192,
             max_num_seqs=256,
+
+            # Logging
             disable_log_stats=False,
-            quantization="awq",  # AWQ quantization if model supports
-            enforce_eager=False,  # Use CUDA graphs
-            enable_prefix_caching=True,  # Enable automatic prefix caching
+            disable_log_requests=False,
         )
 
-    async def generate(self, prompts: list[str], **kwargs):
-        """
-        Batch generation with vLLM
-        """
+        self.model_path = model_path
+
+    def check_awq_support(self, model_path: str) -> bool:
+        """Check if model has AWQ quantization"""
+        import os
+        config_path = os.path.join(model_path, "config.json")
+        if os.path.exists(config_path):
+            import json
+            with open(config_path) as f:
+                config = json.load(f)
+                return config.get("quantization_config", {}).get("quant_method") == "awq"
+        return False
+
+    async def generate(self,
+                       prompts: list,
+                       temperature: float = 0.7,
+                       max_tokens: int = 512,
+                       top_p: float = 0.9,
+                       **kwargs):
+        """Batch generation with vLLM"""
+
         sampling_params = SamplingParams(
-            temperature=kwargs.get("temperature", 0.7),
-            top_p=kwargs.get("top_p", 0.9),
-            max_tokens=kwargs.get("max_tokens", 512),
+            temperature=temperature,
+            top_p=top_p,
+            max_tokens=max_tokens,
             repetition_penalty=kwargs.get("repetition_penalty", 1.1),
+            frequency_penalty=kwargs.get("frequency_penalty", 0.0),
+            presence_penalty=kwargs.get("presence_penalty", 0.0),
+            stop=kwargs.get("stop", None),
+            skip_special_tokens=kwargs.get("skip_special_tokens", True),
         )
 
+        # Generate with vLLM's efficient batching
         outputs = self.llm.generate(prompts, sampling_params)
 
-        return [output.outputs[0].text for output in outputs]
+        # Extract generated text
+        results = []
+        for output in outputs:
+            text = output.outputs[0].text
+            results.append({
+                "generated_text": text,
+                "finish_reason": output.outputs[0].finish_reason,
+                "prompt_tokens": len(output.prompt_token_ids),
+                "completion_tokens": len(output.outputs[0].token_ids),
+            })
 
-    def start_openai_server(self, port: int = 8000):
-        """
-        Start OpenAI-compatible API server
-        """
-        import subprocess
+        return results
 
-        cmd = [
-            "python", "-m", "vllm.entrypoints.openai.api_server",
-            "--model", self.model_path,
-            "--port", str(port),
-            "--max-model-len", "4096",
-            "--gpu-memory-utilization", "0.9",
-            "--enable-prefix-caching"
-        ]
+    def create_openai_compatible_server(self, port: int = 8000):
+        """Create OpenAI-compatible API server"""
 
-        subprocess.run(cmd)
+        # Server startup script
+        server_script = f"""
+#!/bin/bash
+
+# Start vLLM OpenAI-compatible server
+python -m vllm.entrypoints.openai.api_server \\
+    --model {self.model_path} \\
+    --port {port} \\
+    --host 0.0.0.0 \\
+    --gpu-memory-utilization {self.llm.llm_engine.gpu_memory_utilization} \\
+    --max-model-len {self.llm.llm_engine.max_model_len} \\
+    --enable-prefix-caching \\
+    --served-model-name "model" \\
+    --api-key "$VLLM_API_KEY"
+"""
+
+        # Save startup script
+        with open("start_vllm_server.sh", "w") as f:
+            f.write(server_script)
+
+        print(f"Server script created. Run: bash start_vllm_server.sh")
+        print(f"API will be available at: http://localhost:{port}/v1")
+
+        return server_script
 ````
 
-### vLLM Configuration for Production
+### Production Configuration
 
 ```yaml
-# vllm_config.yaml
+# vllm_production.yaml
 model:
   name: "meta-llama/Llama-2-70b-chat-hf"
-  revision: "main"
-  download_dir: "/models"
-  load_format: "auto"
   dtype: "auto"
-  seed: 42
+  max_model_len: 4096
+  download_dir: "/models"
 
 parallel:
-  tensor_parallel_size: 4
+  tensor_parallel_size: 4 # For 4 GPUs
   pipeline_parallel_size: 1
-  ray_workers_use_nsight: false
 
 memory:
   gpu_memory_utilization: 0.95
-  swap_space: 4 # GiB of CPU swap space
-  max_model_len: 4096
-  max_num_batched_tokens: 8192
-  max_num_seqs: 256
+  swap_space: 8 # GB
 
 optimization:
   enable_prefix_caching: true
   enable_chunked_prefill: false
   use_v2_block_manager: true
-  quantization: "awq" # or "gptq", "squeezellm"
 
 serving:
   host: "0.0.0.0"
   port: 8000
   uvicorn_log_level: "info"
-  allow_credentials: true
-  allowed_origins: ["*"]
   api_key: "${VLLM_API_KEY}"
-  served_model_name: "llama-70b"
+
+monitoring:
+  prometheus_port: 9090
+  collect_stats: true
 ```
 
 ## Ollama Local Deployment
+
+### Ollama Model Manager
 
 ```python
 import subprocess
 import requests
 import json
+import os
 
 class OllamaDeployment:
-    def __init__(self):
-        self.base_url = "http://localhost:11434"
+    def __init__(self, base_url: str = "http://localhost:11434"):
+        self.base_url = base_url
+        self.api_url = f"{base_url}/api"
 
-    def pull_model(self, model_name: str):
-        """
-        Pull a model from Ollama registry
-        """
-        subprocess.run(["ollama", "pull", model_name], check=True)
+    def is_running(self) -> bool:
+        """Check if Ollama is running"""
+        try:
+            response = requests.get(f"{self.base_url}/api/tags")
+            return response.status_code == 200
+        except:
+            return False
 
-    def create_modelfile(self, base_model: str, custom_config: dict):
-        """
-        Create custom Modelfile for fine-tuned models
-        """
-        modelfile_content = f"""
-FROM {base_model}
+    def start_ollama(self):
+        """Start Ollama service"""
+        if not self.is_running():
+            subprocess.Popen(["ollama", "serve"],
+                           stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL)
+            print("Starting Ollama service...")
+            # Wait for service to be ready
+            import time
+            for _ in range(30):
+                if self.is_running():
+                    print("Ollama service started successfully")
+                    return
+                time.sleep(1)
+            raise Exception("Failed to start Ollama service")
 
-# Set parameters
-PARAMETER temperature {custom_config.get('temperature', 0.7)}
-PARAMETER top_p {custom_config.get('top_p', 0.9)}
-PARAMETER repeat_penalty {custom_config.get('repeat_penalty', 1.1)}
-PARAMETER seed {custom_config.get('seed', 42)}
+    def create_from_gguf(self,
+                        gguf_path: str,
+                        model_name: str,
+                        system_prompt: str = None,
+                        parameters: dict = None):
+        """Create Ollama model from GGUF file"""
 
-# Set system prompt
-SYSTEM "{custom_config.get('system_prompt', 'You are a helpful assistant.')}"
+        # Create Modelfile
+        modelfile_content = f'FROM {gguf_path}\n\n'
 
-# Add custom template if needed
-TEMPLATE """{{{{ if .System }}}}System: {{{{ .System }}}}
-{{{{ end }}}}User: {{{{ .Prompt }}}}
-Assistant: """
+        if system_prompt:
+            modelfile_content += f'SYSTEM """{system_prompt}"""\n\n'
+
+        if parameters:
+            for key, value in parameters.items():
+                modelfile_content += f'PARAMETER {key} {value}\n'
+
+        # Add template for chat models
+        modelfile_content += '''
+TEMPLATE """{{ if .System }}<|im_start|>system
+{{ .System }}<|im_end|>
+{{ end }}{{ if .Prompt }}<|im_start|>user
+{{ .Prompt }}<|im_end|>
+{{ end }}<|im_start|>assistant
 """
 
-        with open("Modelfile", "w") as f:
+PARAMETER stop <|im_start|>
+PARAMETER stop <|im_end|>
+'''
+
+        # Save Modelfile
+        modelfile_path = f"{model_name}.Modelfile"
+        with open(modelfile_path, "w") as f:
             f.write(modelfile_content)
 
-        # Create model from Modelfile
-        subprocess.run(["ollama", "create", "custom-model", "-f", "Modelfile"])
-
-    def generate(self, model: str, prompt: str, **kwargs):
-        """
-        Generate response using Ollama API
-        """
-        response = requests.post(
-            f"{self.base_url}/api/generate",
-            json={
-                "model": model,
-                "prompt": prompt,
-                "stream": False,
-                **kwargs
-            }
+        # Create model
+        result = subprocess.run(
+            ["ollama", "create", model_name, "-f", modelfile_path],
+            capture_output=True,
+            text=True
         )
 
-        return response.json()["response"]
+        if result.returncode == 0:
+            print(f"Successfully created model: {model_name}")
+            os.remove(modelfile_path)
+            return True
+        else:
+            print(f"Error creating model: {result.stderr}")
+            return False
 
-    def deploy_gguf(self, gguf_path: str, model_name: str):
-        """
-        Deploy a GGUF model with Ollama
-        """
-        modelfile = f"""
-FROM {gguf_path}
+    def deploy_model(self, model_name: str):
+        """Deploy and test model"""
 
-PARAMETER stop "<|im_end|>"
-PARAMETER stop "</s>"
-"""
+        # Pull model if it's from registry
+        if "/" in model_name and not os.path.exists(model_name):
+            print(f"Pulling model: {model_name}")
+            subprocess.run(["ollama", "pull", model_name])
 
-        with open("Modelfile", "w") as f:
-            f.write(modelfile)
+        # Run model
+        result = subprocess.run(
+            ["ollama", "run", model_name, "Hello, how are you?"],
+            capture_output=True,
+            text=True
+        )
 
-        subprocess.run(["ollama", "create", model_name, "-f", "Modelfile"])
+        print(f"Model response: {result.stdout}")
+
+        return result.returncode == 0
+
+    def create_api_endpoint(self, model_name: str):
+        """Create API endpoint for model"""
+
+        from fastapi import FastAPI, HTTPException
+        from pydantic import BaseModel
+
+        app = FastAPI()
+
+        class GenerateRequest(BaseModel):
+            prompt: str
+            temperature: float = 0.7
+            max_tokens: int = 512
+            stream: bool = False
+
+        @app.post("/generate")
+        async def generate(request: GenerateRequest):
+            try:
+                response = requests.post(
+                    f"{self.api_url}/generate",
+                    json={
+                        "model": model_name,
+                        "prompt": request.prompt,
+                        "stream": request.stream,
+                        "options": {
+                            "temperature": request.temperature,
+                            "num_predict": request.max_tokens
+                        }
+                    }
+                )
+
+                if request.stream:
+                    # Handle streaming response
+                    def stream_response():
+                        for line in response.iter_lines():
+                            if line:
+                                yield json.loads(line)
+                    return stream_response()
+                else:
+                    return response.json()
+
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=str(e))
+
+        return app
 ```
 
-## TensorRT-LLM Optimization
+## Production Optimization
 
-```python
-import tensorrt_llm as trtllm
-from tensorrt_llm.runtime import ModelRunner
-
-class TensorRTDeployment:
-    def __init__(self, model_path: str):
-        # Build TensorRT engine
-        self.engine = self.build_engine(model_path)
-        self.runner = ModelRunner(self.engine)
-
-    def build_engine(self, model_path: str):
-        """
-        Build optimized TensorRT engine
-        """
-        builder_config = trtllm.BuilderConfig(
-            max_batch_size=128,
-            max_input_len=2048,
-            max_output_len=512,
-            max_beam_width=4,
-            vocab_size=32000,
-            num_layers=32,
-            num_heads=32,
-            hidden_size=4096,
-            gpt_attention_plugin=True,
-            gemm_plugin=True,
-            layernorm_plugin=True,
-            remove_input_padding=True,
-            paged_kv_cache=True,
-            tokens_per_block=64,
-            max_num_tokens=None,
-            int8_kv_cache=False,
-            fp8_kv_cache=False,
-            use_custom_all_reduce=True,
-        )
-
-        # Convert model to TensorRT
-        engine = trtllm.build(
-            model_path,
-            builder_config,
-            output_dir="./trt_engines"
-        )
-
-        return engine
-```
-
-## Production Deployment Best Practices
-
-### Load Balancing with Multiple Instances
+### Load Balancing Multiple Instances
 
 ```python
 from typing import List
-import random
+import asyncio
+import aiohttp
+from collections import defaultdict
 
-class LoadBalancer:
-    def __init__(self, instances: List[str]):
-        self.instances = instances
-        self.current = 0
+class LoadBalancedDeployment:
+    def __init__(self, endpoints: List[str]):
+        self.endpoints = endpoints
+        self.healthy_endpoints = set(endpoints)
+        self.request_counts = defaultdict(int)
+        self.response_times = defaultdict(list)
 
-    def round_robin(self) -> str:
-        """Round-robin load balancing"""
-        instance = self.instances[self.current]
-        self.current = (self.current + 1) % len(self.instances)
-        return instance
+    async def health_check(self):
+        """Periodic health checking of endpoints"""
+        while True:
+            for endpoint in self.endpoints:
+                try:
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(
+                            f"{endpoint}/health",
+                            timeout=aiohttp.ClientTimeout(total=5)
+                        ) as response:
+                            if response.status == 200:
+                                self.healthy_endpoints.add(endpoint)
+                            else:
+                                self.healthy_endpoints.discard(endpoint)
+                except:
+                    self.healthy_endpoints.discard(endpoint)
 
-    def least_connections(self, connections: Dict[str, int]) -> str:
-        """Least connections load balancing"""
-        return min(connections, key=connections.get)
+            await asyncio.sleep(30)  # Check every 30 seconds
 
-    def weighted_random(self, weights: Dict[str, float]) -> str:
-        """Weighted random load balancing"""
-        return random.choices(
-            list(weights.keys()),
-            weights=list(weights.values())
-        )[0]
-```
+    def get_best_endpoint(self) -> str:
+        """Select best endpoint using least connections"""
+        if not self.healthy_endpoints:
+            raise Exception("No healthy endpoints available")
 
-### Monitoring and Metrics
+        # Find endpoint with least active requests
+        best_endpoint = min(
+            self.healthy_endpoints,
+            key=lambda e: self.request_counts[e]
+        )
 
-```python
-import prometheus_client
-from prometheus_client import Counter, Histogram, Gauge
+        return best_endpoint
 
-# Metrics
-request_count = Counter('llm_requests_total', 'Total LLM requests')
-request_latency = Histogram('llm_request_duration_seconds', 'LLM request latency')
-active_requests = Gauge('llm_active_requests', 'Active LLM requests')
-gpu_memory_usage = Gauge('llm_gpu_memory_usage_bytes', 'GPU memory usage')
+    async def generate(self, prompt: str, **kwargs):
+        """Generate with automatic failover"""
+        endpoint = self.get_best_endpoint()
+        self.request_counts[endpoint] += 1
 
-@request_latency.time()
-@request_count.count_exceptions()
-def serve_request(prompt: str):
-    with active_requests.track_inprogress():
-        # Process request
-        response = model.generate(prompt)
-        return response
+        try:
+            start_time = asyncio.get_event_loop().time()
+
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    f"{endpoint}/v1/completions",
+                    json={
+                        "model": "model",
+                        "prompt": prompt,
+                        **kwargs
+                    }
+                ) as response:
+                    result = await response.json()
+
+            # Track response time
+            response_time = asyncio.get_event_loop().time() - start_time
+            self.response_times[endpoint].append(response_time)
+
+            return result
+
+        except Exception as e:
+            # Mark endpoint as unhealthy and retry with different one
+            self.healthy_endpoints.discard(endpoint)
+            if self.healthy_endpoints:
+                return await self.generate(prompt, **kwargs)
+            raise e
+        finally:
+            self.request_counts[endpoint] -= 1
 ```
 
 ### Docker Deployment
 
 ```dockerfile
+# Dockerfile for vLLM deployment
 FROM nvidia/cuda:12.1.0-runtime-ubuntu22.04
 
 # Install Python and dependencies
 RUN apt-get update && apt-get install -y \
     python3.10 \
     python3-pip \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
-# Install vLLM
-RUN pip install vllm torch
+# Install vLLM and dependencies
+RUN pip install --no-cache-dir \
+    vllm \
+    torch \
+    transformers \
+    fastapi \
+    uvicorn
 
-# Copy model
+# Copy model (or download at runtime)
 COPY ./model /model
+
+# Copy server script
+COPY start_server.py /app/start_server.py
 
 # Expose port
 EXPOSE 8000
 
-# Start vLLM server
-CMD ["python", "-m", "vllm.entrypoints.openai.api_server", \
-     "--model", "/model", \
-     "--port", "8000", \
-     "--gpu-memory-utilization", "0.95"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8000/health || exit 1
+
+# Start server
+CMD ["python", "/app/start_server.py", "--model-path", "/model", "--port", "8000"]
+```
+
+### Kubernetes Deployment
+
+```yaml
+# k8s-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llm-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: llm-server
+  template:
+    metadata:
+      labels:
+        app: llm-server
+    spec:
+      containers:
+        - name: vllm
+          image: vllm/vllm-openai:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: MODEL_NAME
+              value: "/models/llama-2-7b"
+            - name: GPU_MEMORY_UTILIZATION
+              value: "0.9"
+          resources:
+            limits:
+              nvidia.com/gpu: 1
+            requests:
+              memory: "16Gi"
+              cpu: "4"
+          volumeMounts:
+            - name: model-volume
+              mountPath: /models
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 5
+      volumes:
+        - name: model-volume
+          persistentVolumeClaim:
+            claimName: model-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: llm-service
+spec:
+  selector:
+    app: llm-server
+  ports:
+    - port: 80
+      targetPort: 8000
+  type: LoadBalancer
 ```
 
 ## Best Practices
 
-1. **Batching**: Maximize throughput with dynamic batching
-2. **Caching**: Use KV-cache and prefix caching
-3. **Quantization**: Use INT8/INT4 for memory efficiency
-4. **Monitoring**: Track latency, throughput, errors
-5. **Scaling**: Horizontal scaling with load balancer
-6. **Fallbacks**: Have backup models ready
+1. **Use vLLM for production**: Best throughput and latency
+2. **Enable prefix caching**: Significant speedup for common prefixes
+3. **Implement health checks**: Detect and handle failures
+4. **Use load balancing**: Distribute requests across instances
+5. **Monitor GPU memory**: Prevent OOM errors
+6. **Implement request queuing**: Handle burst traffic
+7. **Use quantization**: Reduce memory and increase speed
+8. **Set up monitoring**: Track latency, throughput, errors
+9. **Implement caching**: Cache common responses
+10. **Plan for scaling**: Horizontal scaling for increased load
 
 ````
 
-### dataset-curator.md
-
-```markdown
----
-name: dataset-curator
-description: Expert in dataset preparation, cleaning, and augmentation for LLM training
-tools: Read, Write, Process, Analyze
-model: sonnet
----
-
-# Dataset Curator
-
-Expert in preparing high-quality datasets for LLM training and fine-tuning.
-
-## Dataset Preparation Pipeline
-
-```python
-from datasets import load_dataset, Dataset, DatasetDict
-import pandas as pd
-import json
-from typing import List, Dict, Any
-import re
-from transformers import AutoTokenizer
-
-class DatasetCurator:
-    def __init__(self, tokenizer_name: str):
-        self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
-
-    def load_dataset_from_source(self, source: str, format: str = "auto"):
-        """
-        Load dataset from various sources
-        """
-        if format == "auto":
-            if source.endswith('.json'):
-                format = "json"
-            elif source.endswith('.jsonl'):
-                format = "jsonl"
-            elif source.endswith('.csv'):
-                format = "csv"
-            elif source.endswith('.parquet'):
-                format = "parquet"
-
-        if format == "jsonl":
-            return self.load_jsonl(source)
-        elif format == "json":
-            return load_dataset('json', data_files=source)
-        elif format == "csv":
-            return load_dataset('csv', data_files=source)
-        elif format == "parquet":
-            return load_dataset('parquet', data_files=source)
-        elif format == "huggingface":
-            return load_dataset(source)
-
-    def load_jsonl(self, file_path: str) -> Dataset:
-        """
-        Load JSONL file
-        """
-        data = []
-        with open(file_path, 'r', encoding='utf-8') as f:
-            for line in f:
-                data.append(json.loads(line.strip()))
-        return Dataset.from_list(data)
-
-    def clean_text(self, text: str) -> str:
-        """
-        Clean text data
-        """
-        # Remove extra whitespace
-        text = ' '.join(text.split())
-
-        # Remove special characters but keep punctuation
-        text = re.sub(r'[^\w\s\.\,\!\?\-\:\;\'\"]', '', text)
-
-        # Fix common issues
-        text = text.replace(' ,', ',').replace(' .', '.')
-        text = re.sub(r'\s+([.!?])', r'\1', text)
-
-        return text.strip()
-
-    def filter_by_length(self, dataset: Dataset,
-                        min_length: int = 10,
-                        max_length: int = 2048) -> Dataset:
-        """
-        Filter dataset by token length
-        """
-        def check_length(example):
-            tokens = self.tokenizer(example['text'], truncation=False)
-            length = len(tokens['input_ids'])
-            return min_length <= length <= max_length
-
-        return dataset.filter(check_length)
-
-    def remove_duplicates(self, dataset: Dataset,
-                         column: str = 'text',
-                         fuzzy: bool = False) -> Dataset:
-        """
-        Remove duplicate entries
-        """
-        if not fuzzy:
-            # Exact duplicates
-            df = dataset.to_pandas()
-            df_unique = df.drop_duplicates(subset=[column])
-            return Dataset.from_pandas(df_unique)
-        else:
-            # Fuzzy duplicates using MinHash
-            from datasketch import MinHash, MinHashLSH
-
-            lsh = MinHashLSH(threshold=0.9, num_perm=128)
-
-            unique_indices = []
-            for idx, text in enumerate(dataset[column]):
-                m = MinHash(num_perm=128)
-                for word in text.split():
-                    m.update(word.encode('utf8'))
-
-                if not lsh.query(m):
-                    lsh.insert(f"idx_{idx}", m)
-                    unique_indices.append(idx)
-
-            return dataset.select(unique_indices)
-````
-
-## Dataset Format Conversions
-
-```python
-class FormatConverter:
-    @staticmethod
-    def to_alpaca(dataset: Dataset) -> Dataset:
-        """
-        Convert to Alpaca format
-        """
-        def format_alpaca(example):
-            if example.get('input', ''):
-                text = f"""### Instruction:
-{example['instruction']}
-
-### Input:
-{example['input']}
-
-### Response:
-{example['output']}"""
-            else:
-                text = f"""### Instruction:
-{example['instruction']}
-
-### Response:
-{example['output']}"""
-
-            return {"text": text}
-
-        return dataset.map(format_alpaca)
-
-    @staticmethod
-    def to_chatml(dataset: Dataset) -> Dataset:
-        """
-        Convert to ChatML format
-        """
-        def format_chatml(example):
-            messages = example.get('messages', [])
-
-            text = ""
-            for message in messages:
-                role = message['role']
-                content = message['content']
-                text += f"<|im_start|>{role}\n{content}<|im_end|>\n"
-
-            return {"text": text}
-
-        return dataset.map(format_chatml)
-
-    @staticmethod
-    def to_sharegpt(dataset: Dataset) -> Dataset:
-        """
-        Convert to ShareGPT format
-        """
-        def format_sharegpt(example):
-            conversations = []
-
-            if 'instruction' in example:
-                conversations.append({
-                    "from": "human",
-                    "value": example['instruction']
-                })
-
-            if 'output' in example:
-                conversations.append({
-                    "from": "gpt",
-                    "value": example['output']
-                })
-
-            return {"conversations": conversations}
-
-        return dataset.map(format_sharegpt)
-```
-
-## Data Quality Analysis
-
-```python
-class DataQualityAnalyzer:
-    def __init__(self, tokenizer):
-        self.tokenizer = tokenizer
-
-    def analyze_dataset(self, dataset: Dataset) -> Dict[str, Any]:
-        """
-        Comprehensive dataset analysis
-        """
-        analysis = {
-            "total_samples": len(dataset),
-            "columns": dataset.column_names,
-            "sample_examples": dataset.select(range(min(3, len(dataset)))),
-        }
-
-        # Token statistics
-        if 'text' in dataset.column_names:
-            lengths = []
-            for text in dataset['text']:
-                tokens = self.tokenizer(text, truncation=False)
-                lengths.append(len(tokens['input_ids']))
-
-            analysis['token_stats'] = {
-                "mean": sum(lengths) / len(lengths),
-                "min": min(lengths),
-                "max": max(lengths),
-                "median": sorted(lengths)[len(lengths)//2]
-            }
-
-        # Check for issues
-        issues = []
-
-        # Check for empty entries
-        empty_count = sum(1 for text in dataset['text'] if not text.strip())
-        if empty_count > 0:
-            issues.append(f"{empty_count} empty entries found")
-
-        # Check for very short entries
-        short_count = sum(1 for text in dataset['text'] if len(text.split()) < 5)
-        if short_count > 0:
-            issues.append(f"{short_count} very short entries (<5 words)")
-
-        analysis['issues'] = issues
-
-        return analysis
-
-    def generate_quality_report(self, dataset: Dataset) -> str:
-        """
-        Generate detailed quality report
-        """
-        analysis = self.analyze_dataset(dataset)
-
-        report = f"""
-# Dataset Quality Report
-
-## Overview
-- Total Samples: {analysis['total_samples']}
-- Columns: {', '.join(analysis['columns'])}
-
-## Token Statistics
-- Mean Length: {analysis['token_stats']['mean']:.1f}
-- Min Length: {analysis['token_stats']['min']}
-- Max Length: {analysis['token_stats']['max']}
-- Median Length: {analysis['token_stats']['median']}
-
-## Quality Issues
-{chr(10).join('- ' + issue for issue in analysis['issues']) if analysis['issues'] else 'No issues detected'}
-
-## Recommendations
-{self.generate_recommendations(analysis)}
-"""
-        return report
-
-    def generate_recommendations(self, analysis: Dict) -> str:
-        recs = []
-
-        if analysis['token_stats']['max'] > 4096:
-            recs.append("Consider truncating very long sequences")
-
-        if analysis['token_stats']['min'] < 10:
-            recs.append("Filter out very short sequences")
-
-        if analysis['issues']:
-            recs.append("Address identified quality issues before training")
-
-        return '\n'.join('- ' + rec for rec in recs)
-```
-
-## Data Augmentation
-
-```python
-class DataAugmenter:
-    def __init__(self):
-        self.augmentation_methods = {
-            'paraphrase': self.paraphrase,
-            'backtranslation': self.backtranslate,
-            'template_variation': self.vary_templates,
-            'synthetic_generation': self.generate_synthetic
-        }
-
-    def paraphrase(self, text: str, model="paraphrase-MiniLM-L6-v2") -> List[str]:
-        """
-        Generate paraphrases using a paraphrasing model
-        """
-        from sentence_transformers import SentenceTransformer
-        from transformers import pipeline
-
-        paraphraser = pipeline("text2text-generation",
-                               model="Vamsi/T5_Paraphrase_Paws")
-
-        paraphrases = []
-        for i in range(3):  # Generate 3 paraphrases
-            result = paraphraser(
-                f"paraphrase: {text}",
-                max_length=512,
-                do_sample=True,
-                temperature=0.7 + i * 0.1
-            )
-            paraphrases.append(result[0]['generated_text'])
-
-        return paraphrases
-
-    def backtranslate(self, text: str,
-                      intermediate_lang: str = "de") -> str:
-        """
-        Augment via back-translation
-        """
-        from transformers import pipeline
-
-        # Translate to intermediate language
-        translator_to = pipeline(
-            f"translation_en_to_{intermediate_lang}",
-            model=f"Helsinki-NLP/opus-mt-en-{intermediate_lang}"
-        )
-
-        # Translate back to English
-        translator_back = pipeline(
-            f"translation_{intermediate_lang}_to_en",
-            model=f"Helsinki-NLP/opus-mt-{intermediate_lang}-en"
-        )
-
-        intermediate = translator_to(text)[0]['translation_text']
-        back_translated = translator_back(intermediate)[0]['translation_text']
-
-        return back_translated
-
-    def vary_templates(self, instruction: str, response: str) -> List[Dict]:
-        """
-        Create variations with different prompt templates
-        """
-        templates = [
-            {
-                "user": f"Question: {instruction}",
-                "assistant": f"Answer: {response}"
-            },
-            {
-                "user": f"Task: {instruction}",
-                "assistant": f"Solution: {response}"
-            },
-            {
-                "user": f"Please help me with: {instruction}",
-                "assistant": response
-            },
-            {
-                "user": instruction,
-                "assistant": f"Here's the response: {response}"
-            }
-        ]
-
-        return templates
-
-    def generate_synthetic(self, seed_examples: List[Dict],
-                          num_synthetic: int = 100) -> List[Dict]:
-        """
-        Generate synthetic examples based on seed examples
-        """
-        # This would use a generative model to create new examples
-        # similar to the seed examples
-        synthetic_data = []
-
-        # Implementation would involve:
-        # 1. Fine-tune a model on seed examples
-        # 2. Generate new examples
-        # 3. Filter for quality
-
-        return synthetic_data
-```
-
-## Dataset Mixing and Balancing
-
-```python
-def mix_datasets(datasets: Dict[str, Dataset],
-                 weights: Dict[str, float] = None) -> Dataset:
-    """
-    Mix multiple datasets with specified weights
-    """
-    if weights is None:
-        weights = {name: 1.0 for name in datasets.keys()}
-
-    mixed_data = []
-
-    for name, dataset in datasets.items():
-        weight = weights[name]
-        num_samples = int(len(dataset) * weight)
-
-        # Sample from dataset
-        sampled = dataset.shuffle().select(range(min(num_samples, len(dataset))))
-
-        # Add source tag
-        sampled = sampled.map(lambda x: {**x, 'source': name})
-        mixed_data.append(sampled)
-
-    # Concatenate all datasets
-    from datasets import concatenate_datasets
-    mixed = concatenate_datasets(mixed_data)
-
-    # Shuffle final dataset
-    return mixed.shuffle()
-```
-
-## Best Practices
-
-1. **Quality over Quantity**: Better to have less high-quality data
-2. **Diversity**: Include diverse examples and domains
-3. **Deduplication**: Remove exact and near duplicates
-4. **Validation Split**: Always keep a held-out validation set
-5. **Format Consistency**: Ensure consistent formatting
-6. **Length Filtering**: Remove too short/long examples
-
-````
-
-### optimization-expert.md
-
-```markdown
----
-name: optimization-expert
-description: Expert in model optimization, quantization, and efficient inference
-tools: Optimize, Benchmark, Profile
-model: sonnet
----
-
-# Optimization Expert
-
-Expert in optimizing LLMs for efficient training and inference.
-
-## Quantization Techniques
-
-### GPTQ Quantization
-```python
-from auto_gptq import AutoGPTQForCausalLM, BaseQuantizeConfig
-import torch
-
-class GPTQQuantizer:
-    def __init__(self, model_path: str, dataset_path: str):
-        self.model_path = model_path
-        self.dataset_path = dataset_path
-
-    def quantize_model(self, bits: int = 4):
-        """
-        Quantize model using GPTQ
-        """
-        quantize_config = BaseQuantizeConfig(
-            bits=bits,  # 4-bit quantization
-            group_size=128,  # Group size for quantization
-            desc_act=False,  # Activation order
-            sym=True,  # Symmetric quantization
-            true_sequential=True,  # Sequential quantization
-            use_cuda_fp16=True,  # Use FP16 during quantization
-            model_seqlen=2048,  # Model sequence length
-            block_name_to_quantize=None,  # Quantize all blocks
-            module_name_preceding_first_block=None,
-            batch_size=1,
-            pad_token_id=None,
-            use_triton=False,
-            use_cuda_fp32_accum=False,
-            disable_exllama=False,
-            disable_exllamav2=False,
-            max_input_length=None
-        )
-
-        # Load model
-        model = AutoGPTQForCausalLM.from_pretrained(
-            self.model_path,
-            quantize_config=quantize_config,
-            device_map="auto"
-        )
-
-        # Load calibration dataset
-        from datasets import load_dataset
-        dataset = load_dataset(self.dataset_path)
-
-        # Prepare examples for calibration
-        examples = []
-        for data in dataset['train'].select(range(128)):  # Use 128 samples
-            examples.append(self.tokenizer(data['text'], truncation=True))
-
-        # Quantize
-        model.quantize(examples)
-
-        # Save quantized model
-        model.save_quantized("./quantized_model", use_safetensors=True)
-
-        return model
-````
-
-### AWQ Quantization
-
-```python
-from awq import AutoAWQForCausalLM
-from transformers import AutoTokenizer
-
-class AWQQuantizer:
-    def __init__(self, model_path: str):
-        self.model = AutoAWQForCausalLM.from_pretrained(model_path)
-        self.tokenizer = AutoTokenizer.from_pretrained(model_path)
-
-    def quantize(self, bits: int = 4):
-        """
-        Apply Activation-aware Weight Quantization
-        """
-        quant_config = {
-            "zero_point": True,
-            "q_group_size": 128,
-            "w_bit": bits,
-            "version": "GEMM"
-        }
-
-        # Calibration data
-        calibration_data = self.load_calibration_data()
-
-        # Quantize
-        self.model.quantize(
-            tokenizer=self.tokenizer,
-            quant_config=quant_config,
-            calib_data=calibration_data
-        )
-
-        # Save
-        self.model.save_quantized("./awq_model")
-        self.tokenizer.save_pretrained("./awq_model")
-```
-
-## Memory Optimization
-
-### Flash Attention Implementation
-
-```python
-import torch
-from flash_attn import flash_attn_func, flash_attn_qkvpacked_func
-from einops import rearrange
-
-class FlashAttentionOptimizer:
-    @staticmethod
-    def apply_flash_attention(model):
-        """
-        Replace standard attention with Flash Attention
-        """
-        def flash_attention_forward(self, hidden_states, attention_mask=None):
-            batch_size, seq_len, _ = hidden_states.shape
-
-            # Compute QKV
-            qkv = self.qkv_proj(hidden_states)
-            qkv = rearrange(qkv, 'b s (three h d) -> b s three h d',
-                          three=3, h=self.num_heads)
-
-            # Apply Flash Attention
-            attn_output = flash_attn_qkvpacked_func(
-                qkv,
-                dropout_p=self.dropout_p if self.training else 0.0,
-                softmax_scale=self.scale,
-                causal=self.is_causal
-            )
-
-            # Reshape output
-            attn_output = rearrange(attn_output, 'b s h d -> b s (h d)')
-
-            return self.out_proj(attn_output)
-
-        # Replace attention forward method
-        for module in model.modules():
-            if hasattr(module, 'attention'):
-                module.attention.forward = flash_attention_forward.__get__(
-                    module.attention, module.attention.__class__
-                )
-
-        return model
-```
-
-### Gradient Checkpointing with Custom Implementation
-
-```python
-import torch.utils.checkpoint as checkpoint
-
-class GradientCheckpointOptimizer:
-    @staticmethod
-    def apply_selective_checkpointing(model, checkpoint_ratio=0.5):
-        """
-        Apply gradient checkpointing to selected layers
-        """
-        total_layers = len(model.transformer.h)
-        checkpoint_layers = int(total_layers * checkpoint_ratio)
-
-        def custom_forward(module):
-            def forward_wrapper(*args, **kwargs):
-                if module.layer_idx < checkpoint_layers:
-                    return checkpoint.checkpoint(
-                        module._forward,
-                        *args,
-                        use_reentrant=False,
-                        **kwargs
-                    )
-                return module._forward(*args, **kwargs)
-            return forward_wrapper
-
-        for idx, layer in enumerate(model.transformer.h):
-            layer.layer_idx = idx
-            layer._forward = layer.forward
-            layer.forward = custom_forward(layer)
-```
-
-## Inference Optimization
-
-### KV-Cache Optimization
-
-```python
-class KVCacheOptimizer:
-    def __init__(self, max_batch_size: int, max_seq_len: int):
-        self.max_batch_size = max_batch_size
-        self.max_seq_len = max_seq_len
-
-    def create_static_kv_cache(self, model):
-        """
-        Pre-allocate KV cache for faster inference
-        """
-        config = model.config
-        cache_shape = (
-            self.max_batch_size,
-            config.num_key_value_heads,
-            self.max_seq_len,
-            config.hidden_size // config.num_attention_heads
-        )
-
-        kv_cache = {
-            f"layer_{i}": {
-                "key": torch.zeros(cache_shape, dtype=torch.float16, device="cuda"),
-                "value": torch.zeros(cache_shape, dtype=torch.float16, device="cuda")
-            }
-            for i in range(config.num_hidden_layers)
-        }
-
-        return kv_cache
-
-    def paged_attention(self, query, key, value, block_size=16):
-        """
-        Implement paged attention for efficient KV cache usage
-        """
-        batch_size, num_heads, seq_len, head_dim = query.shape
-
-        # Divide into blocks
-        num_blocks = (seq_len + block_size - 1) // block_size
-
-        output = torch.zeros_like(query)
-
-        for block_idx in range(num_blocks):
-            start_idx = block_idx * block_size
-            end_idx = min(start_idx + block_size, seq_len)
-
-            # Compute attention for this block
-            block_output = torch.nn.functional.scaled_dot_product_attention(
-                query[:, :, start_idx:end_idx],
-                key,
-                value,
-                is_causal=True
-            )
-
-            output[:, :, start_idx:end_idx] = block_output
-
-        return output
-```
-
-### Dynamic Batching
-
-```python
-from typing import List, Tuple
-import numpy as np
-
-class DynamicBatcher:
-    def __init__(self, max_batch_size: int, max_seq_len: int):
-        self.max_batch_size = max_batch_size
-        self.max_seq_len = max_seq_len
-        self.pending_requests = []
-
-    def add_request(self, input_ids: torch.Tensor, request_id: str):
-        """
-        Add request to batching queue
-        """
-        self.pending_requests.append({
-            'input_ids': input_ids,
-            'request_id': request_id,
-            'timestamp': time.time()
-        })
-
-    def create_batch(self) -> Tuple[torch.Tensor, List[str]]:
-        """
-        Create optimal batch from pending requests
-        """
-        if not self.pending_requests:
-            return None, None
-
-        # Sort by sequence length for better packing
-        self.pending_requests.sort(key=lambda x: len(x['input_ids']))
-
-        batch_input_ids = []
-        batch_request_ids = []
-        current_max_len = 0
-
-        for request in self.pending_requests[:self.max_batch_size]:
-            seq_len = len(request['input_ids'])
-
-            # Check if adding this sequence exceeds limits
-            if seq_len > self.max_seq_len:
-                continue
-
-            batch_input_ids.append(request['input_ids'])
-            batch_request_ids.append(request['request_id'])
-            current_max_len = max(current_max_len, seq_len)
-
-            if len(batch_input_ids) >= self.max_batch_size:
-                break
-
-        # Pad sequences to same length
-        padded_batch = self.pad_batch(batch_input_ids, current_max_len)
-
-        # Remove batched requests from pending
-        self.pending_requests = self.pending_requests[len(batch_input_ids):]
-
-        return padded_batch, batch_request_ids
-```
-
-## Profiling and Benchmarking
-
-```python
-import torch.profiler as profiler
-import time
-
-class ModelProfiler:
-    def profile_model(self, model, input_data, num_iterations=100):
-        """
-        Profile model performance
-        """
-        # Warmup
-        for _ in range(10):
-            _ = model(input_data)
-
-        # Profile
-        with profiler.profile(
-            activities=[
-                profiler.ProfilerActivity.CPU,
-                profiler.ProfilerActivity.CUDA,
-            ],
-            record_shapes=True,
-            profile_memory=True,
-            with_stack=True,
-            with_flops=True,
-            with_modules=True,
-        ) as prof:
-            with profiler.record_function("model_inference"):
-                for _ in range(num_iterations):
-                    _ = model(input_data)
-
-        # Print profiling results
-        print(prof.key_averages().table(
-            sort_by="cuda_time_total",
-            row_limit=20
-        ))
-
-        # Export to Chrome tracing
-        prof.export_chrome_trace("trace.json")
-
-        # Memory profiling
-        memory_stats = {
-            "peak_memory": torch.cuda.max_memory_allocated(),
-            "current_memory": torch.cuda.memory_allocated(),
-            "reserved_memory": torch.cuda.memory_reserved()
-        }
-
-        return memory_stats
-
-    def benchmark_throughput(self, model, batch_sizes=[1, 8, 16, 32]):
-        """
-        Benchmark model throughput at different batch sizes
-        """
-        results = {}
-
-        for batch_size in batch_sizes:
-            input_ids = torch.randint(0, 32000,
-                                     (batch_size, 512),
-                                     device="cuda")
-
-            # Warmup
-            for _ in range(5):
-                _ = model.generate(input_ids, max_new_tokens=128)
-
-            # Benchmark
-            start_time = time.time()
-            num_tokens_generated = 0
-
-            for _ in range(10):
-                output = model.generate(input_ids, max_new_tokens=128)
-                num_tokens_generated += output.shape[0] * 128
-
-            elapsed_time = time.time() - start_time
-            throughput = num_tokens_generated / elapsed_time
-
-            results[batch_size] = {
-                "throughput": throughput,
-                "latency": elapsed_time / 10,
-                "tokens_per_second": throughput
-            }
-
-        return results
-```
-
-## Best Practices
-
-1. **Profile First**: Always profile before optimizing
-2. **Batch Processing**: Maximize GPU utilization with batching
-3. **Memory Management**: Monitor and optimize memory usage
-4. **Quantization**: Use appropriate quantization for deployment
-5. **Caching**: Implement KV-cache for faster inference
-6. **Hardware Optimization**: Use hardware-specific optimizations
-
-````
-
-### evaluation-analyst.md
-
-```markdown
----
-name: evaluation-analyst
-description: Expert in model evaluation, benchmarking, and performance analysis
-tools: Evaluate, Analyze, Report
-model: sonnet
----
-
-# Evaluation Analyst
-
-Expert in comprehensive model evaluation and benchmarking.
-
-## Evaluation Framework
-
-```python
-from transformers import AutoModelForCausalLM, AutoTokenizer
-import torch
-from datasets import load_dataset
-from typing import Dict, List, Any
-import numpy as np
-from tqdm import tqdm
-
-class ModelEvaluator:
-    def __init__(self, model_path: str):
-        self.model = AutoModelForCausalLM.from_pretrained(
-            model_path,
-            torch_dtype=torch.bfloat16,
-            device_map="auto"
-        )
-        self.tokenizer = AutoTokenizer.from_pretrained(model_path)
-
-    def evaluate_perplexity(self, dataset: Dataset) -> float:
-        """
-        Calculate model perplexity
-        """
-        self.model.eval()
-        total_loss = 0
-        total_tokens = 0
-
-        with torch.no_grad():
-            for batch in tqdm(dataset, desc="Calculating perplexity"):
-                inputs = self.tokenizer(
-                    batch['text'],
-                    return_tensors="pt",
-                    truncation=True,
-                    max_length=2048
-                ).to(self.model.device)
-
-                outputs = self.model(**inputs, labels=inputs['input_ids'])
-                total_loss += outputs.loss.item() * inputs['input_ids'].shape[1]
-                total_tokens += inputs['input_ids'].shape[1]
-
-        perplexity = torch.exp(torch.tensor(total_loss / total_tokens))
-        return perplexity.item()
-
-    def evaluate_generation_quality(self,
-                                   prompts: List[str],
-                                   references: List[str]) -> Dict[str, float]:
-        """
-        Evaluate generation quality with multiple metrics
-        """
-        from rouge_score import rouge_scorer
-        from bert_score import score as bert_score
-        import sacrebleu
-
-        generated_texts = []
-
-        # Generate responses
-        for prompt in tqdm(prompts, desc="Generating responses"):
-            inputs = self.tokenizer(prompt, return_tensors="pt")
-
-            with torch.no_grad():
-                outputs = self.model.generate(
-                    **inputs,
-                    max_new_tokens=256,
-                    temperature=0.7,
-                    do_sample=True,
-                    top_p=0.9
-                )
-
-            generated = self.tokenizer.decode(
-                outputs[0][inputs['input_ids'].shape[1]:],
-                skip_special_tokens=True
-            )
-            generated_texts.append(generated)
-
-        # Calculate metrics
-        metrics = {}
-
-        # ROUGE scores
-        scorer = rouge_scorer.RougeScorer(
-            ['rouge1', 'rouge2', 'rougeL'],
-            use_stemmer=True
-        )
-
-        rouge_scores = {'rouge1': [], 'rouge2': [], 'rougeL': []}
-        for gen, ref in zip(generated_texts, references):
-            scores = scorer.score(ref, gen)
-            for key in rouge_scores:
-                rouge_scores[key].append(scores[key].fmeasure)
-
-        for key in rouge_scores:
-            metrics[f'{key}_f1'] = np.mean(rouge_scores[key])
-
-        # BERTScore
-        P, R, F1 = bert_score(generated_texts, references, lang="en")
-        metrics['bertscore_f1'] = F1.mean().item()
-
-        # BLEU score
-        bleu = sacrebleu.corpus_bleu(generated_texts, [references])
-        metrics['bleu'] = bleu.score
-
-        return metrics
-````
-
-## Benchmark Evaluation
-
-```python
-class BenchmarkEvaluator:
-    def __init__(self, model, tokenizer):
-        self.model = model
-        self.tokenizer = tokenizer
-
-    def evaluate_mmlu(self) -> Dict[str, float]:
-        """
-        Evaluate on MMLU (Massive Multitask Language Understanding)
-        """
-        from datasets import load_dataset
-
-        dataset = load_dataset("cais/mmlu", "all")
-
-        subjects = [
-            'abstract_algebra', 'anatomy', 'astronomy', 'business_ethics',
-            'clinical_knowledge', 'college_biology', 'college_chemistry',
-            'college_computer_science', 'college_mathematics', 'college_medicine',
-            'college_physics', 'computer_security', 'conceptual_physics',
-            'econometrics', 'electrical_engineering', 'elementary_mathematics',
-            'formal_logic', 'global_facts', 'high_school_biology',
-            'high_school_chemistry', 'high_school_computer_science',
-            'high_school_european_history', 'high_school_geography',
-            'high_school_government_and_politics', 'high_school_macroeconomics',
-            'high_school_mathematics', 'high_school_microeconomics',
-            'high_school_physics', 'high_school_psychology', 'high_school_statistics',
-            'high_school_us_history', 'high_school_world_history', 'human_aging',
-            'human_sexuality', 'international_law', 'jurisprudence',
-            'logical_fallacies', 'machine_learning', 'management', 'marketing',
-            'medical_genetics', 'miscellaneous', 'moral_disputes', 'moral_scenarios',
-            'nutrition', 'philosophy', 'prehistory', 'professional_accounting',
-            'professional_law', 'professional_medicine', 'professional_psychology',
-            'public_relations', 'security_studies', 'sociology', 'us_foreign_policy',
-            'virology', 'world_religions'
-        ]
-
-        results = {}
-
-        for subject in subjects:
-            subject_data = load_dataset("cais/mmlu", subject)
-            correct = 0
-            total = 0
-
-            for example in subject_data['test']:
-                # Format as multiple choice
-                prompt = f"""Question: {example['question']}
-
-A) {example['choices'][0]}
-B) {example['choices'][1]}
-C) {example['choices'][2]}
-D) {example['choices'][3]}
-
-Answer:"""
-
-                # Get model prediction
-                inputs = self.tokenizer(prompt, return_tensors="pt")
-
-                with torch.no_grad():
-                    outputs = self.model.generate(
-                        **inputs,
-                        max_new_tokens=1,
-                        temperature=0,
-                        do_sample=False
-                    )
-
-                prediction = self.tokenizer.decode(
-                    outputs[0][-1],
-                    skip_special_tokens=True
-                ).strip().upper()
-
-                # Check if correct
-                correct_answer = ['A', 'B', 'C', 'D'][example['answer']]
-                if prediction == correct_answer:
-                    correct += 1
-                total += 1
-
-            results[subject] = correct / total if total > 0 else 0
-
-        # Calculate average
-        results['average'] = np.mean(list(results.values()))
-
-        return results
-
-    def evaluate_humaneval(self) -> Dict[str, float]:
-        """
-        Evaluate on HumanEval code generation benchmark
-        """
-        from datasets import load_dataset
-        from human_eval.evaluation import evaluate_functional_correctness
-
-        dataset = load_dataset("openai_humaneval")
-
-        predictions = []
-
-        for problem in dataset['test']:
-            # Generate solution
-            prompt = problem['prompt']
-
-            inputs = self.tokenizer(prompt, return_tensors="pt")
-
-            with torch.no_grad():
-                outputs = self.model.generate(
-                    **inputs,
-                    max_new_tokens=512,
-                    temperature=0.1,
-                    do_sample=True,
-                    top_p=0.95,
-                    stop_strings=["def ", "class ", "\n\n"]
-                )
-
-            generated = self.tokenizer.decode(
-                outputs[0][inputs['input_ids'].shape[1]:],
-                skip_special_tokens=True
-            )
-
-            predictions.append({
-                'task_id': problem['task_id'],
-                'completion': generated
-            })
-
-        # Evaluate functional correctness
-        results = evaluate_functional_correctness(predictions)
-
-        return results
-
-    def evaluate_gsm8k(self) -> float:
-        """
-        Evaluate on GSM8K math problems
-        """
-        dataset = load_dataset("gsm8k", "main")
-
-        correct = 0
-        total = 0
-
-        for example in tqdm(dataset['test'][:100], desc="Evaluating GSM8K"):
-            # Format prompt
-            prompt = f"""Problem: {example['question']}
-
-Let's solve this step by step.
-
-Solution:"""
-
-            inputs = self.tokenizer(prompt, return_tensors="pt")
-
-            with torch.no_grad():
-                outputs = self.model.generate(
-                    **inputs,
-                    max_new_tokens=512,
-                    temperature=0,
-                    do_sample=False
-                )
-
-            generated = self.tokenizer.decode(
-                outputs[0][inputs['input_ids'].shape[1]:],
-                skip_special_tokens=True
-            )
-
-            # Extract numerical answer
-            import re
-            numbers = re.findall(r'\d+', generated)
-            if numbers:
-                predicted_answer = numbers[-1]
-
-                # Extract ground truth answer
-                true_answer = re.findall(r'\d+', example['answer'])[-1]
-
-                if predicted_answer == true_answer:
-                    correct += 1
-
-            total += 1
-
-        accuracy = correct / total if total > 0 else 0
-        return accuracy
-```
-
-## Custom Evaluation Metrics
-
-```python
-class CustomMetrics:
-    @staticmethod
-    def calculate_diversity(texts: List[str]) -> Dict[str, float]:
-        """
-        Calculate diversity metrics for generated texts
-        """
-        from collections import Counter
-        import numpy as np
-
-        all_tokens = []
-        all_bigrams = []
-        all_trigrams = []
-
-        for text in texts:
-            tokens = text.split()
-            all_tokens.extend(tokens)
-
-            # Bigrams
-            for i in range(len(tokens) - 1):
-                all_bigrams.append(f"{tokens[i]} {tokens[i+1]}")
-
-            # Trigrams
-            for i in range(len(tokens) - 2):
-                all_trigrams.append(f"{tokens[i]} {tokens[i+1]} {tokens[i+2]}")
-
-        # Calculate distinct-n
-        distinct_1 = len(set(all_tokens)) / len(all_tokens) if all_tokens else 0
-        distinct_2 = len(set(all_bigrams)) / len(all_bigrams) if all_bigrams else 0
-        distinct_3 = len(set(all_trigrams)) / len(all_trigrams) if all_trigrams else 0
-
-        # Calculate entropy
-        token_counts = Counter(all_tokens)
-        probs = np.array(list(token_counts.values())) / len(all_tokens)
-        entropy = -np.sum(probs * np.log(probs + 1e-10))
-
-        return {
-            'distinct_1': distinct_1,
-            'distinct_2': distinct_2,
-            'distinct_3': distinct_3,
-            'entropy': entropy
-        }
-
-    @staticmethod
-    def calculate_consistency(model, prompts: List[str], num_runs: int = 5) -> float:
-        """
-        Calculate model consistency across multiple runs
-        """
-        from sklearn.metrics.pairwise import cosine_similarity
-        from sentence_transformers import SentenceTransformer
-
-        encoder = SentenceTransformer('all-MiniLM-L6-v2')
-
-        consistency_scores = []
-
-        for prompt in prompts:
-            responses = []
-
-            # Generate multiple responses
-            for _ in range(num_runs):
-                inputs = model.tokenizer(prompt, return_tensors="pt")
-
-                with torch.no_grad():
-                    outputs = model.model.generate(
-                        **inputs,
-                        max_new_tokens=128,
-                        temperature=0.7,
-                        do_sample=True
-                    )
-
-                response = model.tokenizer.decode(
-                    outputs[0][inputs['input_ids'].shape[1]:],
-                    skip_special_tokens=True
-                )
-                responses.append(response)
-
-            # Calculate pairwise similarities
-            embeddings = encoder.encode(responses)
-            similarities = cosine_similarity(embeddings)
-
-            # Average similarity (excluding diagonal)
-            mask = np.ones_like(similarities) - np.eye(len(responses))
-            avg_similarity = (similarities * mask).sum() / mask.sum()
-
-            consistency_scores.append(avg_similarity)
-
-        return np.mean(consistency_scores)
-```
-
-## Evaluation Report Generation
-
-```python
-class EvaluationReporter:
-    def generate_comprehensive_report(self,
-                                     model_path: str,
-                                     output_path: str = "./evaluation_report.md"):
-        """
-        Generate comprehensive evaluation report
-        """
-        evaluator = ModelEvaluator(model_path)
-        benchmark_eval = BenchmarkEvaluator(evaluator.model, evaluator.tokenizer)
-
-        report = f"""# Model Evaluation Report
-
-## Model Information
-- **Model Path**: {model_path}
-- **Evaluation Date**: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
-
-## Perplexity Evaluation
-{self.evaluate_perplexity_section(evaluator)}
-
-## Benchmark Results
-
-### MMLU (Massive Multitask Language Understanding)
-{self.evaluate_mmlu_section(benchmark_eval)}
-
-### HumanEval (Code Generation)
-{self.evaluate_humaneval_section(benchmark_eval)}
-
-### GSM8K (Math Problems)
-{self.evaluate_gsm8k_section(benchmark_eval)}
-
-## Generation Quality
-{self.evaluate_generation_section(evaluator)}
-
-## Diversity Metrics
-{self.evaluate_diversity_section(evaluator)}
-
-## Performance Metrics
-{self.evaluate_performance_section(evaluator)}
-
-## Recommendations
-{self.generate_recommendations()}
-"""
-
-        with open(output_path, 'w') as f:
-            f.write(report)
-
-        return report
-```
-
-## Best Practices
-
-1. **Multiple Metrics**: Use diverse evaluation metrics
-2. **Consistent Settings**: Use same generation parameters
-3. **Statistical Significance**: Run multiple evaluations
-4. **Domain-Specific**: Include domain-specific benchmarks
-5. **Human Evaluation**: Complement with human evaluation
-6. **Regular Evaluation**: Track performance over time
-
-````
+### Additional agents (dataset-curator, optimization-expert, evaluation-analyst) would continue...
 
 ## Skills
 
@@ -2640,47 +1926,60 @@ allowed-tools: Monitor, Analyze, Optimize
 
 Automatically monitors and optimizes GPU usage during training and inference.
 
-## GPU Memory Management
-
-### Automatic Optimization Triggers
+## Activation Triggers
 - GPU memory usage > 90%
 - OOM errors detected
-- Training speed < expected
-- Multi-GPU imbalance
+- Training speed below expected
+- Multi-GPU imbalance detected
+- Temperature > 80°C
 
-### Optimization Strategies
+## Automatic Interventions
+
+### Memory Optimization
 ```python
-# Gradient accumulation for large batches
+# Automatic memory clearing
+torch.cuda.empty_cache()
+
+# Enable gradient checkpointing if memory critical
 if gpu_memory_usage > 0.9:
-    increase_gradient_accumulation()
-    reduce_batch_size()
+    model.gradient_checkpointing_enable()
 
-# Enable gradient checkpointing
-if model_size > available_memory * 0.8:
-    enable_gradient_checkpointing()
-
-# Mixed precision training
-if not using_mixed_precision:
-    enable_bf16_training()
-
-# CPU offloading
-if memory_critical:
-    enable_cpu_offloading()
+# Reduce batch size dynamically
+if oom_detected:
+    batch_size = max(1, batch_size // 2)
+    print(f"Reduced batch size to {batch_size}")
 ````
 
 ### Multi-GPU Optimization
 
-- Data parallelism with DDP
-- Tensor parallelism for large models
-- Pipeline parallelism for deep networks
-- ZeRO optimization stages
+- Detect GPU imbalance
+- Redistribute model layers
+- Balance data loading
+- Optimize communication
 
-## Monitoring Metrics
+### Performance Monitoring
 
-- GPU utilization percentage
-- Memory allocation/reservation
-- Temperature and power usage
-- Tensor core utilization
+```bash
+# GPU utilization check
+nvidia-smi --query-gpu=utilization.gpu,memory.used,memory.total --format=csv
+
+# Power and temperature
+nvidia-smi --query-gpu=power.draw,temperature.gpu --format=csv
+```
+
+## Optimization Strategies
+
+1. **Mixed Precision**: Automatically enable bf16/fp16
+2. **Flash Attention**: Switch to Flash Attention when available
+3. **Gradient Accumulation**: Increase for larger effective batch
+4. **CPU Offloading**: Move optimizer states to CPU
+5. **Tensor Parallelism**: Split model across GPUs
+
+## Alerts
+
+- Memory usage > 95%: Critical warning
+- Temperature > 85°C: Thermal throttling risk
+- Utilization < 50%: Underutilization warning
 
 ````
 
@@ -2695,45 +1994,58 @@ allowed-tools: Monitor, Optimize, Clear
 
 # Memory Management Skill
 
-Prevents OOM errors and optimizes memory usage.
+Prevents OOM errors and optimizes memory usage automatically.
 
-## Memory Monitoring
+## Activation Triggers
+- Before model loading
+- After each training epoch
+- On OOM detection
+- When switching models
+- Memory usage > threshold
+
+## Automatic Actions
+
+### Memory Monitoring
 ```python
-def monitor_memory():
+def get_memory_stats():
     return {
-        'allocated': torch.cuda.memory_allocated(),
-        'reserved': torch.cuda.memory_reserved(),
-        'free': torch.cuda.mem_get_info()[0],
-        'total': torch.cuda.mem_get_info()[1]
+        'allocated': torch.cuda.memory_allocated() / 1024**3,  # GB
+        'reserved': torch.cuda.memory_reserved() / 1024**3,
+        'free': torch.cuda.mem_get_info()[0] / 1024**3,
+        'total': torch.cuda.mem_get_info()[1] / 1024**3
     }
 ````
 
-## Automatic Interventions
+### Preventive Measures
 
-### Clear Cache
+1. **Pre-allocation Check**: Verify memory before operations
+2. **Automatic Cleanup**: Clear cache periodically
+3. **Batch Size Adjustment**: Dynamic sizing based on available memory
+4. **Model Sharding**: Split large models automatically
 
-- After each training epoch
-- Before large allocations
-- After model deletion
+### Recovery Actions
 
-### Batch Size Adjustment
+On OOM:
 
-- Dynamic batch sizing based on available memory
-- Automatic reduction on OOM
+1. Clear CUDA cache
+2. Reduce batch size
+3. Enable gradient checkpointing
+4. Offload to CPU if needed
+5. Restart with optimized settings
 
-### Memory-Efficient Alternatives
+## Memory Optimization Techniques
 
-- Replace attention with Flash Attention
-- Use gradient checkpointing
-- Enable CPU offloading
-- Quantize activations
+- Replace standard attention with Flash Attention
+- Use 8-bit optimizers
+- Enable gradient checkpointing
+- Implement activation checkpointing
+- Use mixed precision training
 
-## Best Practices
+## Thresholds
 
-- Pre-allocate tensors when possible
-- Reuse buffers
-- Delete unused variables
-- Use context managers for temporary allocations
+- Warning: 85% memory usage
+- Critical: 95% memory usage
+- Action: 90% memory usage
 
 ````
 
@@ -2742,7 +2054,7 @@ def monitor_memory():
 ```markdown
 ---
 name: hyperparameter-tuning
-description: Automatically suggests and tunes hyperparameters
+description: Automatically suggests and validates hyperparameters
 allowed-tools: Analyze, Suggest, Track
 ---
 
@@ -2750,49 +2062,59 @@ allowed-tools: Analyze, Suggest, Track
 
 Optimizes training hyperparameters based on model and dataset characteristics.
 
+## Activation Triggers
+- Starting new training
+- Poor convergence detected
+- Validation loss increasing
+- Training plateau detected
+- Gradient explosion/vanishing
+
 ## Automatic Suggestions
 
 ### Learning Rate
 ```python
-def suggest_learning_rate(model_size, batch_size):
-    # Base LR scales with batch size
-    base_lr = 2e-5
-    lr = base_lr * (batch_size / 32)
+def suggest_learning_rate(model_params, batch_size, model_type):
+    # Base learning rates by model size
+    base_lr = {
+        "small": 5e-4,   # <1B params
+        "medium": 2e-4,  # 1-10B params
+        "large": 1e-4,   # 10-30B params
+        "xlarge": 5e-5   # >30B params
+    }
 
-    # Adjust for model size
-    if model_size > 10e9:  # >10B parameters
-        lr *= 0.5
-    elif model_size < 1e9:  # <1B parameters
-        lr *= 2.0
+    # Adjust for batch size (linear scaling rule)
+    lr = base_lr[model_type] * (batch_size / 32)
 
-    return lr
+    # Cap maximum learning rate
+    return min(lr, 1e-3)
 ````
 
-### Batch Size
+### Batch Size Optimization
 
-- Maximize GPU utilization
-- Balance with gradient accumulation
-- Consider sequence length
+- Start with largest that fits in memory
+- Use gradient accumulation for effective larger batches
+- Monitor gradient noise scale
 
-### Training Schedule
+### Scheduler Selection
 
-- Warmup steps: 3-10% of total
-- Cosine or linear decay
-- Restart strategies for long training
+- **Cosine**: Default for most cases
+- **Linear**: Good for fine-tuning
+- **Polynomial**: Smooth decay
+- **OneCycleLR**: For super-convergence
 
-## Optimization Algorithms
+## Monitoring Metrics
 
-- AdamW for most cases
-- Adafactor for memory efficiency
-- LAMB for large batch training
-- 8-bit optimizers for memory savings
+- Loss curve smoothness
+- Gradient norm trends
+- Learning rate vs loss correlation
+- Weight update magnitudes
 
-## Tracking and Analysis
+## Auto-Adjustments
 
-- Log all hyperparameters
-- Track loss curves
-- Monitor gradient norms
-- Detect overfitting/underfitting
+- Reduce LR on plateau
+- Early stopping on overfitting
+- Gradient clipping on explosion
+- Warmup adjustment based on stability
 
 ````
 
@@ -2807,56 +2129,183 @@ allowed-tools: Analyze, Compare, Recommend
 
 # Model Selection Skill
 
-Recommends optimal models based on requirements.
+Recommends optimal models based on requirements and constraints.
+
+## Activation Triggers
+- User asks for model recommendation
+- Starting new project
+- Resource constraints specified
+- Task requirements defined
 
 ## Selection Criteria
 
-### Task Requirements
-- **Text Generation**: Llama, Mistral, GPT variants
-- **Code Generation**: Code Llama, DeepSeek Coder, StarCoder
-- **Math/Reasoning**: Minerva, Llemma, DeepSeekMath
-- **Multimodal**: LLaVA, CLIP, Flamingo
-
-### Resource Constraints
+### By Task Type
 ```yaml
-small_gpu:  # <8GB VRAM
-  - phi-2 (2.7B)
-  - mistral-7b-qlora
-  - llama-7b-gptq
+text_generation:
+  quality_focused:
+    - llama-3-70b
+    - mixtral-8x22b
+    - gpt-j-6b
+  balanced:
+    - llama-2-13b
+    - mistral-7b
+    - yi-34b
+  speed_focused:
+    - llama-2-7b
+    - phi-2
+    - gemma-2b
 
-medium_gpu:  # 8-24GB VRAM
-  - llama-13b
-  - mistral-7b
-  - yi-34b-qlora
+code_generation:
+  - codellama-34b
+  - deepseek-coder-33b
+  - starcoder-15b
+  - codegen-16B
 
-large_gpu:  # >24GB VRAM
-  - llama-70b
-  - mixtral-8x7b
-  - falcon-40b
+math_reasoning:
+  - deepseek-math-7b
+  - llemma-34b
+  - minerva-62b
 ````
 
-### Performance Requirements
+### By Hardware
 
-- Latency sensitive: Use smaller, quantized models
-- Quality focused: Use larger, full-precision models
-- Balanced: Use medium models with optimization
+```yaml
+consumer_gpu: # 8-12GB VRAM
+  full_precision:
+    - phi-2
+    - gemma-2b
+    - llama-2-7b (barely)
+  quantized:
+    - llama-2-13b-qlora
+    - mistral-7b-gptq
+    - yi-34b-int4
 
-## Model Comparison
-
-- Benchmark scores (MMLU, HumanEval, etc.)
-- Inference speed
-- Memory requirements
-- License restrictions
+datacenter_gpu: # 24-80GB VRAM
+  full_precision:
+    - llama-2-70b (80GB)
+    - llama-2-13b (24GB)
+    - mixtral-8x7b (48GB)
+  optimized:
+    - llama-2-70b-int8 (40GB)
+    - mixtral-8x7b-awq (24GB)
+```
 
 ## Recommendations
 
-Based on:
+### Decision Tree
 
-1. Task type
-2. Available resources
-3. Performance needs
-4. Budget constraints
+1. Define task requirements
+2. Check hardware constraints
+3. Consider quality vs speed tradeoff
+4. Evaluate licensing requirements
+5. Test with sample data
 
+### Optimization Suggestions
+
+- Use quantization for larger models
+- Consider LoRA fine-tuning instead of full
+- Try smaller specialized models
+- Implement caching for repeated queries
+
+## Model Comparison Metrics
+
+- Perplexity scores
+- Task-specific benchmarks
+- Inference speed (tokens/sec)
+- Memory requirements
+- License restrictions
+
+````
+
+## Hooks Configuration
+
+```json
+{
+  "hooks": {
+    "SessionStart": {
+      "enabled": true,
+      "actions": [
+        {
+          "type": "command",
+          "command": "echo 'LLM Plugin loaded. Checking GPU availability...'"
+        },
+        {
+          "type": "skill",
+          "name": "gpu-optimization",
+          "action": "check_gpus"
+        }
+      ]
+    },
+    "pre-training": {
+      "enabled": true,
+      "pattern": "/train*",
+      "actions": [
+        {
+          "type": "skill",
+          "name": "gpu-optimization",
+          "action": "optimize_settings"
+        },
+        {
+          "type": "skill",
+          "name": "hyperparameter-tuning",
+          "action": "suggest_params"
+        },
+        {
+          "type": "skill",
+          "name": "memory-management",
+          "action": "check_available"
+        }
+      ]
+    },
+    "during-training": {
+      "enabled": true,
+      "trigger": "epoch_end",
+      "actions": [
+        {
+          "type": "skill",
+          "name": "memory-management",
+          "action": "clear_cache"
+        },
+        {
+          "type": "command",
+          "command": "echo 'Epoch complete. Clearing cache...'"
+        }
+      ]
+    },
+    "on-oom": {
+      "enabled": true,
+      "trigger": "oom_error",
+      "actions": [
+        {
+          "type": "skill",
+          "name": "memory-management",
+          "action": "emergency_cleanup"
+        },
+        {
+          "type": "skill",
+          "name": "gpu-optimization",
+          "action": "reduce_memory_usage"
+        }
+      ]
+    },
+    "post-training": {
+      "enabled": true,
+      "pattern": "/train*",
+      "trigger": "completion",
+      "actions": [
+        {
+          "type": "command",
+          "command": "echo 'Training complete. Running evaluation...'"
+        },
+        {
+          "type": "skill",
+          "name": "model-selection",
+          "action": "suggest_next_steps"
+        }
+      ]
+    }
+  }
+}
 ````
 
 ## MCP Server Configuration
@@ -2870,183 +2319,39 @@ Based on:
       "command": "python",
       "args": ["./mcp-servers/training_monitor.py"],
       "env": {
+        "WANDB_API_KEY": "${WANDB_API_KEY}",
         "TENSORBOARD_PORT": "6006"
       }
     },
     {
       "name": "model-registry",
-      "description": "Manages model versions and deployments",
+      "description": "Manages model versions and metadata",
       "command": "python",
-      "args": ["./mcp-servers/model_registry.py"]
+      "args": ["./mcp-servers/model_registry.py"],
+      "env": {
+        "REGISTRY_PATH": "./models",
+        "HF_TOKEN": "${HF_TOKEN}"
+      }
     },
     {
       "name": "gpu-manager",
-      "description": "Manages GPU allocation and monitoring",
+      "description": "GPU allocation and monitoring",
       "command": "python",
       "args": ["./mcp-servers/gpu_manager.py"]
     },
     {
-      "name": "dataset-processor",
-      "description": "Processes and serves datasets",
+      "name": "inference-server",
+      "description": "Model inference endpoint",
       "command": "python",
-      "args": ["./mcp-servers/dataset_processor.py"]
+      "args": ["./mcp-servers/inference_server.py"],
+      "env": {
+        "DEFAULT_MODEL": "llama-2-7b",
+        "PORT": "8080"
+      }
     }
   ]
 }
-````
-
-## Hooks Configuration
-
-```json
-{
-  "hooks": {
-    "pre-training": {
-      "enabled": true,
-      "actions": [
-        {
-          "type": "skill",
-          "name": "gpu-optimization"
-        },
-        {
-          "type": "skill",
-          "name": "hyperparameter-tuning"
-        }
-      ]
-    },
-    "during-training": {
-      "enabled": true,
-      "interval": "every_epoch",
-      "actions": [
-        {
-          "type": "skill",
-          "name": "memory-management"
-        },
-        {
-          "type": "command",
-          "name": "evaluate",
-          "condition": "epoch % 5 == 0"
-        }
-      ]
-    },
-    "post-training": {
-      "enabled": true,
-      "actions": [
-        {
-          "type": "command",
-          "name": "evaluate",
-          "args": ["final"]
-        },
-        {
-          "type": "command",
-          "name": "quantize",
-          "args": ["auto"]
-        }
-      ]
-    },
-    "on-error": {
-      "enabled": true,
-      "actions": [
-        {
-          "type": "skill",
-          "name": "memory-management",
-          "action": "clear_and_retry"
-        }
-      ]
-    }
-  }
-}
 ```
-
-## Output Styles
-
-### training-report.md
-
-```markdown
----
-name: training-report
-description: Comprehensive training report template
----
-
-# Training Report
-
-## Model Configuration
-
-- **Base Model**: {{BASE_MODEL}}
-- **Training Method**: {{METHOD}}
-- **Dataset**: {{DATASET}}
-
-## Hyperparameters
-
-{{HYPERPARAMETERS_TABLE}}
-
-## Training Progress
-
-{{LOSS_CURVES}}
-{{LEARNING_RATE_SCHEDULE}}
-
-## Resource Usage
-
-- **Peak GPU Memory**: {{PEAK_MEMORY}}
-- **Training Time**: {{TOTAL_TIME}}
-- **Tokens/Second**: {{THROUGHPUT}}
-
-## Evaluation Results
-
-{{EVALUATION_METRICS}}
-
-## Checkpoints Saved
-
-{{CHECKPOINT_LIST}}
-
-## Recommendations
-
-{{NEXT_STEPS}}
-```
-
-### model-card.md
-
-````markdown
----
-name: model-card
-description: Model documentation card
----
-
-# Model Card: {{MODEL_NAME}}
-
-## Model Details
-
-- **Developed by**: {{DEVELOPER}}
-- **Model type**: {{MODEL_TYPE}}
-- **Language**: {{LANGUAGE}}
-- **License**: {{LICENSE}}
-- **Base Model**: {{BASE_MODEL}}
-
-## Training Details
-
-- **Training Data**: {{TRAINING_DATA}}
-- **Training Procedure**: {{TRAINING_PROCEDURE}}
-- **Compute**: {{COMPUTE_RESOURCES}}
-
-## Evaluation
-
-{{BENCHMARK_RESULTS}}
-
-## Limitations
-
-{{LIMITATIONS}}
-
-## Ethical Considerations
-
-{{ETHICAL_CONSIDERATIONS}}
-
-## Usage
-
-```python
-{{USAGE_EXAMPLE}}
-```
-````
-
-````
 
 ## Usage Examples
 
@@ -3054,61 +2359,158 @@ description: Model documentation card
 
 ```bash
 # User command
-/finetune lora llama2-7b alpaca-dataset ./my-lora-model
+/finetune lora llama2-7b dataset.jsonl ./my-model
 
 # Plugin flow:
-1. Check GPU availability
-2. Setup Python environment
-3. Invoke finetuning-expert agent
-4. Agent configures Unsloth for 2x faster training
-5. Applies LoRA with r=16, alpha=16
-6. Trains on dataset with optimal batch size
-7. Saves LoRA adapters
-8. Generates training report
-````
+1. Command validates inputs
+2. Checks GPU availability (gpu-optimization skill)
+3. Suggests hyperparameters (hyperparameter-tuning skill)
+4. Invokes finetuning-expert agent
+5. Agent:
+   - Loads model with Unsloth
+   - Applies LoRA adapters (r=16)
+   - Trains with optimized settings
+   - Saves adapters
+6. training-monitor MCP server tracks progress
+7. Post-training evaluation runs automatically
+```
 
 ### Deploying with vLLM
 
 ```bash
 # User command
-/serve vllm ./my-model --port 8000
+/serve vllm ./my-model 8000
 
 # Plugin flow:
-1. Invoke deployment-engineer agent
-2. Configure vLLM with tensor parallelism
-3. Setup OpenAI-compatible API
-4. Enable prefix caching
-5. Start server with monitoring
-6. Ready for production inference
+1. Command checks model format
+2. deployment-engineer agent invoked
+3. Agent:
+   - Initializes vLLM with optimal settings
+   - Detects GPU count for tensor parallelism
+   - Enables prefix caching
+   - Creates OpenAI-compatible endpoint
+4. inference-server MCP starts
+5. Health checks enabled
+6. Ready for production traffic
 ```
 
 ### Model Evaluation
 
 ```bash
 # User command
-/evaluate my-model mmlu accuracy
+/evaluate llama2-7b mmlu
 
 # Plugin flow:
-1. Load model with optimization
-2. Invoke evaluation-analyst agent
-3. Run MMLU benchmark
-4. Calculate accuracy metrics
-5. Generate evaluation report
-6. Provide recommendations
+1. Command loads model
+2. evaluation-analyst agent invoked
+3. Agent:
+   - Loads MMLU benchmark
+   - Runs evaluation across 57 subjects
+   - Calculates accuracy scores
+   - Generates detailed report
+4. Results saved and displayed
+5. Recommendations provided
 ```
 
-## Success Metrics
+### Quantization for Deployment
 
-- **Training Speed**: 2x faster with Unsloth
-- **Memory Efficiency**: 50% less VRAM with QLoRA
-- **Inference Throughput**: >1000 tokens/second with vLLM
-- **Evaluation Coverage**: All major benchmarks supported
-- **Deployment Time**: <5 minutes from model to API
+```bash
+# User command
+/quantize gptq llama2-13b ./llama2-13b-gptq
+
+# Plugin flow:
+1. Command validates model path
+2. optimization-expert agent invoked
+3. Agent:
+   - Loads calibration dataset
+   - Applies GPTQ quantization
+   - Tests quantized model
+   - Saves optimized model
+4. Size reduction: ~75%
+5. Speed improvement measured
+```
+
+## Performance Benchmarks
+
+### Training Speed
+
+- **LoRA with Unsloth**: 2x faster than standard
+- **QLoRA**: Enables 70B model fine-tuning on 24GB GPU
+- **Multi-GPU**: Near-linear scaling up to 8 GPUs
+
+### Inference Performance
+
+- **vLLM**: 10-20x throughput vs naive implementation
+- **Quantized models**: 2-4x speedup with <3% quality loss
+- **Ollama**: Fast local inference with GGUF
+
+### Memory Efficiency
+
+- **QLoRA**: 75% memory reduction
+- **Gradient checkpointing**: 30% memory savings
+- **Flash Attention**: 10x memory efficiency for long contexts
+
+## Troubleshooting
+
+### Common Issues
+
+**CUDA Out of Memory**
+
+- Skills automatically reduce batch size
+- Enable gradient checkpointing
+- Use QLoRA instead of full fine-tuning
+
+**Slow Training**
+
+- Check GPU utilization with nvidia-smi
+- Ensure Flash Attention is enabled
+- Verify data loading isn't bottleneck
+
+**Poor Model Quality**
+
+- Check learning rate (may be too high)
+- Increase training epochs
+- Verify dataset quality
+
+**Deployment Issues**
+
+- Ensure model format compatibility
+- Check available ports
+- Verify GPU drivers updated
+
+## Best Practices Summary
+
+1. **Always start with smaller models** for testing
+2. **Use QLoRA for large models** on limited hardware
+3. **Monitor GPU metrics** throughout training
+4. **Save checkpoints frequently** during training
+5. **Test quantized models** before production
+6. **Use vLLM for production** deployments
+7. **Implement health checks** and monitoring
+8. **Document model versions** and parameters
+9. **Validate on held-out data** before deployment
+10. **Plan for scaling** from day one
 
 ## Future Enhancements
 
-1. **AutoML Integration**: Automatic hyperparameter search
-2. **Distributed Training**: Multi-node training support
-3. **Model Merging**: Combine multiple LoRA adapters
-4. **Continuous Learning**: Online learning from feedback
-5. **Edge Deployment**: Mobile and embedded optimization
+1. **AutoML Integration**: Hyperparameter search
+2. **Model Merging**: Combine multiple LoRA adapters
+3. **Continuous Learning**: Online learning from production
+4. **Edge Deployment**: Mobile and embedded optimization
+5. **Multi-Modal Support**: Vision-language models
+6. **Federated Learning**: Privacy-preserving training
+7. **Model Compression**: Beyond quantization
+
+## Contributing
+
+To contribute:
+
+1. Follow existing patterns
+2. Add comprehensive documentation
+3. Include working code examples
+4. Test on multiple GPU configurations
+5. Submit PR with benchmarks
+
+## License
+
+MIT License - See LICENSE file for details

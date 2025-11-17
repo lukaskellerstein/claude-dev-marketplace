@@ -130,6 +130,21 @@ Official one is not available.
 
 Official one is not available.
 
+# Shadcn UI
+
+Documentation: https://ui.shadcn.com/docs/mcp
+
+```json
+{
+  "mcpServers": {
+    "shadcn": {
+      "command": "npx",
+      "args": ["shadcn@latest", "mcp"]
+    }
+  }
+}
+```
+
 # Documentations
 
 ```json

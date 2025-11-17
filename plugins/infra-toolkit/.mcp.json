@@ -39,6 +39,21 @@
         "ALLOWED_DOMAINS": "helm.sh"
       },
       "description": "Helm package manager documentation for chart development"
+    },
+    "gcloud": {
+      "command": "npx",
+      "args": ["-y", "@google-cloud/gcloud-mcp"],
+      "description": "Google Cloud CLI integration for infrastructure management"
+    },
+    "gcloudstorage": {
+      "command": "npx",
+      "args": ["-y", "@google-cloud/storage-mcp"],
+      "description": "Google Cloud Storage management"
+    },
+    "terraform": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "hashicorp/terraform-mcp-server:0.2.3"],
+      "description": "Terraform infrastructure as code execution and management"
     }
   }
 }

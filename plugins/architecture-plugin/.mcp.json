@@ -1,12 +1,14 @@
 {
   "mcpServers": {
-    "architecture-analyzer": {
+    "github": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-everything"],
-      "env": {
-        "ANALYSIS_DEPTH": "3",
-        "ENABLED_FEATURES": "codebase-analysis,dependency-graph,metrics"
-      }
+      "args": ["-y", "@github/mcp-server"],
+      "description": "GitHub integration for repository analysis and code review"
+    },
+    "mermaid-mcp": {
+      "url": "https://mcp.mermaidchart.com/mcp",
+      "type": "http",
+      "description": "Mermaid diagram generation for architecture visualizations"
     }
   }
 }

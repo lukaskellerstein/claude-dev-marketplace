@@ -36,8 +36,15 @@
     "./commands/quantize.md",
     "./commands/dataset.md"
   ],
-  "agents": "./agents/",
+  "agents": [
+    "./agents/dataset-curator.md",
+    "./agents/deployment-engineer.md",
+    "./agents/evaluation-analyst.md",
+    "./agents/finetuning-expert.md",
+    "./agents/optimization-expert.md",
+    "./agents/training-specialist.md"
+  ],
   "skills": "./skills/",
   "hooks": "./hooks/hooks.json",
-  "mcpServers": "./mcp-servers/config.json"
+  "mcpServers": "./.mcp.json"
 }

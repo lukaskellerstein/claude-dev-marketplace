@@ -25,7 +25,12 @@
     "ui-components"
   ],
   "commands": "./commands/",
-  "agents": "./agents/",
+  "agents": [
+    "./agents/architecture-planner.md",
+    "./agents/performance-auditor.md",
+    "./agents/react-generator.md",
+    "./agents/style-master.md"
+  ],
   "skills": "./skills/",
   "hooks": "./hooks/hooks.json",
   "mcpServers": "./.mcp.json"

@@ -21,7 +21,14 @@
     "cloud"
   ],
   "commands": ["./commands/*.md"],
-  "agents": "./agents/",
+  "agents": [
+    "./agents/docker-expert.md",
+    "./agents/gcp-expert.md",
+    "./agents/helm-expert.md",
+    "./agents/infrastructure-expert.md",
+    "./agents/k8s-expert.md",
+    "./agents/terraform-expert.md"
+  ],
   "skills": "./skills/",
   "mcpServers": "./.mcp.json"
 }

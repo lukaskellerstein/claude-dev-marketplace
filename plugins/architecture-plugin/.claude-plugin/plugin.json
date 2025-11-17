@@ -26,7 +26,14 @@
     "./commands/visualize.md",
     "./commands/pattern.md"
   ],
-  "agents": "./agents/",
+  "agents": [
+    "./agents/cloud-architect.md",
+    "./agents/ddd-expert.md",
+    "./agents/event-architect.md",
+    "./agents/microservices-architect.md",
+    "./agents/monolith-specialist.md",
+    "./agents/patterns-expert.md"
+  ],
   "skills": "./skills/",
   "hooks": "./hooks/hooks.json",
   "mcpServers": "./.mcp.json"

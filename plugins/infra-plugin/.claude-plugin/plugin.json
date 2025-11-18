@@ -37,6 +37,7 @@
     "./agents/infrastructure-expert.md",
     "./agents/istio-expert.md",
     "./agents/k8s-expert.md",
+    "./agents/oauth2-keycloak-expert.md",
     "./agents/terraform-expert.md"
   ],
   "skills": [
@@ -45,7 +46,9 @@
     "./skills/helm-validator",
     "./skills/iac-compliance",
     "./skills/istio-advisor",
-    "./skills/k8s-optimizer"
+    "./skills/k8s-optimizer",
+    "./skills/keycloak-config",
+    "./skills/oauth2-proxy-config"
   ],
   "mcpServers": "./.mcp.json"
 }

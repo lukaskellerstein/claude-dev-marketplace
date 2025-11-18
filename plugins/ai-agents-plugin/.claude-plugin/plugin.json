@@ -22,12 +22,6 @@
     "multi-agent",
     "langchain-1.0"
   ],
-  "requirements": {
-    "langchain": ">=1.0.0",
-    "langgraph": ">=1.0.0",
-    "agent-framework": ">=0.1.0",
-    "langchain-anthropic": ">=1.0.0"
-  },
   "commands": [
     "./commands/agent.md",
     "./commands/workflow.md",

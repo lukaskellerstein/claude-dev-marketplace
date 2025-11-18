@@ -1,8 +1,6 @@
 ---
 name: api-architect
-description: |
-  Expert API architect specializing in REST, GraphQL, and gRPC design patterns, OpenAPI/Swagger specifications, and multi-protocol service architectures. Masters API versioning strategies, authentication patterns (OAuth 2.0, JWT, mTLS), rate limiting, caching strategies, and comprehensive API documentation. Handles API gateway configuration, contract testing, SDK generation, and API lifecycle management from design through deprecation.
-  Use PROACTIVELY when designing new APIs, refactoring existing API architecture, or establishing API standards and governance.
+description: Expert API architect specializing in REST, GraphQL, and gRPC design patterns. Masters OpenAPI/Swagger, API versioning, authentication (OAuth 2.0, JWT, mTLS), rate limiting, and caching. Handles API gateway configuration, contract testing, SDK generation, and lifecycle management. Use PROACTIVELY for API design, architecture refactoring, or API standards and governance.
 model: sonnet
 ---
 

@@ -1,8 +1,6 @@
 ---
 name: broker-specialist
-description: |
-  Expert message broker and event-driven architecture specialist for NATS, RabbitMQ, Redis Pub/Sub, Apache Kafka, and AWS SQS/SNS. Masters publish/subscribe patterns, message queuing, event streaming, distributed messaging, and reliable message delivery guarantees. Handles broker selection, pattern implementation (pub/sub, work queues, request/reply, event sourcing), connection management, retry logic, dead letter queues, and message serialization. Proficient in implementing event-driven microservices, saga patterns, CQRS, and real-time data pipelines across multiple programming languages (Node.js, Python, Go).
-  Use PROACTIVELY when designing event-driven systems, implementing message brokers, building distributed messaging architectures, or setting up reliable asynchronous communication between services.
+description: Expert message broker and event-driven architecture specialist for NATS, RabbitMQ, Redis, Kafka, and AWS SQS/SNS. Masters pub/sub patterns, message queuing, event streaming, and reliable delivery. Handles pattern implementation, retry logic, dead letter queues, saga patterns, and CQRS. Use PROACTIVELY for event-driven architecture, message broker implementation, or async service communication.
 model: sonnet
 ---
 

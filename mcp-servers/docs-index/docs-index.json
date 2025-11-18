@@ -567,6 +567,122 @@
         "tags": ["middlewares", "routing"],
         "related": ["kubernetes-ingress"]
       }
+    ],
+    "envoy": [
+      {
+        "id": "envoy-intro",
+        "name": "Envoy Introduction",
+        "description": "High-performance L7 proxy and communication bus for service mesh architectures",
+        "url": "https://www.envoyproxy.io/docs/envoy/latest/intro/intro",
+        "tags": ["proxy", "service-mesh", "l7"],
+        "related": ["istio-envoy", "envoy-config"]
+      },
+      {
+        "id": "envoy-config",
+        "name": "Envoy Configuration",
+        "description": "Comprehensive guide to configuring Envoy proxy with listeners, filters, and clusters",
+        "url": "https://www.envoyproxy.io/docs/envoy/latest/configuration/configuration",
+        "tags": ["configuration", "proxy"],
+        "related": ["envoy-intro", "envoy-filters"]
+      },
+      {
+        "id": "envoy-filters",
+        "name": "HTTP Filters",
+        "description": "HTTP filter architecture for request/response processing in Envoy",
+        "url": "https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/http_filters",
+        "tags": ["filters", "http", "routing"],
+        "related": ["envoy-config", "envoy-rate-limiting"]
+      },
+      {
+        "id": "envoy-rate-limiting",
+        "name": "Rate Limiting",
+        "description": "Implementing rate limiting and throttling with Envoy",
+        "url": "https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/other_features/global_rate_limiting",
+        "tags": ["rate-limiting", "throttling"],
+        "related": ["envoy-filters"]
+      },
+      {
+        "id": "envoy-observability",
+        "name": "Observability & Statistics",
+        "description": "Metrics, tracing, and logging in Envoy for observability",
+        "url": "https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/observability/observability",
+        "tags": ["observability", "metrics", "tracing"],
+        "related": ["envoy-intro"]
+      }
+    ],
+    "istio": [
+      {
+        "id": "istio-concepts",
+        "name": "Istio Concepts",
+        "description": "Core concepts and architecture of Istio service mesh",
+        "url": "https://istio.io/latest/docs/concepts/",
+        "tags": ["service-mesh", "architecture"],
+        "related": ["istio-traffic", "istio-security"]
+      },
+      {
+        "id": "istio-traffic",
+        "name": "Traffic Management",
+        "description": "Advanced traffic routing, load balancing, and fault injection with Istio",
+        "url": "https://istio.io/latest/docs/concepts/traffic-management/",
+        "tags": ["traffic-management", "routing", "load-balancing"],
+        "related": ["istio-concepts", "istio-virtual-service"]
+      },
+      {
+        "id": "istio-virtual-service",
+        "name": "Virtual Services",
+        "description": "Configure request routing with VirtualService CRDs",
+        "url": "https://istio.io/latest/docs/reference/config/networking/virtual-service/",
+        "tags": ["routing", "crd", "kubernetes"],
+        "related": ["istio-traffic", "istio-destination-rule"]
+      },
+      {
+        "id": "istio-destination-rule",
+        "name": "Destination Rules",
+        "description": "Traffic policies and load balancing configuration for services",
+        "url": "https://istio.io/latest/docs/reference/config/networking/destination-rule/",
+        "tags": ["traffic-policy", "load-balancing"],
+        "related": ["istio-virtual-service", "istio-traffic"]
+      },
+      {
+        "id": "istio-security",
+        "name": "Security",
+        "description": "mTLS, authorization, and authentication in Istio service mesh",
+        "url": "https://istio.io/latest/docs/concepts/security/",
+        "tags": ["security", "mtls", "authentication"],
+        "related": ["istio-concepts", "istio-authz"]
+      },
+      {
+        "id": "istio-authz",
+        "name": "Authorization Policies",
+        "description": "Fine-grained access control with AuthorizationPolicy CRDs",
+        "url": "https://istio.io/latest/docs/reference/config/security/authorization-policy/",
+        "tags": ["authorization", "rbac", "security"],
+        "related": ["istio-security"]
+      },
+      {
+        "id": "istio-observability",
+        "name": "Observability",
+        "description": "Distributed tracing, metrics, and logging with Istio",
+        "url": "https://istio.io/latest/docs/concepts/observability/",
+        "tags": ["observability", "tracing", "metrics"],
+        "related": ["istio-concepts", "envoy-observability"]
+      },
+      {
+        "id": "istio-gateway",
+        "name": "Gateways",
+        "description": "Manage ingress and egress traffic with Istio Gateway resources",
+        "url": "https://istio.io/latest/docs/reference/config/networking/gateway/",
+        "tags": ["gateway", "ingress", "egress"],
+        "related": ["istio-virtual-service", "kubernetes-ingress"]
+      },
+      {
+        "id": "istio-envoy",
+        "name": "Envoy in Istio",
+        "description": "How Istio uses Envoy as its data plane proxy",
+        "url": "https://istio.io/latest/docs/ops/deployment/architecture/#envoy",
+        "tags": ["envoy", "data-plane", "proxy"],
+        "related": ["envoy-intro", "istio-concepts"]
+      }
     ]
   }
 }

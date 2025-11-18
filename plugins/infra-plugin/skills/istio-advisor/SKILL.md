@@ -1,7 +1,6 @@
 ---
 name: istio-advisor
-description: Master Istio service mesh guidance and best practices. Use when creating VirtualService/DestinationRule/Gateway YAML, configuring service mesh, implementing mTLS, setting up traffic management, defining authorization policies, working with Envoy configuration, or when discussing Istio architecture, service mesh patterns, traffic routing strategies, canary deployments, circuit breakers, fault injection, distributed tracing, mesh observability, security policies, or troubleshooting service mesh issues.
-allowed-tools: Read, Edit, Grep
+description: Validate and optimize Istio configurations following production best practices. Use when creating or editing VirtualService, DestinationRule, Gateway YAML files, configuring mTLS policies, or implementing traffic routing rules.
 ---
 
 # Istio Advisor Skill

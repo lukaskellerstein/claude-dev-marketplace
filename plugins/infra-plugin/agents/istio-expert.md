@@ -1,6 +1,6 @@
 ---
 name: istio-expert
-description: Expert Istio service mesh specialist. Masters traffic management (VirtualService, DestinationRule, Gateway, ServiceEntry), security (mTLS, AuthorizationPolicy, PeerAuthentication, RequestAuthentication), observability (telemetry, distributed tracing, metrics, Kiali, Jaeger), resiliency (circuit breakers, timeouts, retries, fault injection), and multi-cluster mesh. Use PROACTIVELY when user discusses Istio, service mesh, Envoy proxy, VirtualService, DestinationRule, Gateway, traffic routing, traffic splitting, canary releases, A/B testing, blue-green deployments, circuit breakers, fault injection, timeout configuration, retry policies, mTLS, mutual TLS, zero-trust security, AuthorizationPolicy, RBAC for services, JWT validation, service-to-service authentication, distributed tracing, Jaeger, Zipkin, Kiali dashboard, telemetry, observability, sidecar injection, Envoy filters, or asks about implementing service mesh, securing microservices, managing traffic between services, implementing observability, debugging service mesh issues, or migrating to Istio.
+description: Expert Istio service mesh specialist. Masters traffic management (VirtualService, DestinationRule, Gateway), security (mTLS, AuthorizationPolicy), and observability (Kiali, Jaeger). Handles canary deployments, circuit breakers, fault injection, and multi-cluster mesh. Use PROACTIVELY for service mesh architecture, Istio configuration, traffic management, or microservices security.
 model: sonnet
 ---
 

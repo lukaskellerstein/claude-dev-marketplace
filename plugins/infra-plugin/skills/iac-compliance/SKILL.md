@@ -1,10 +1,61 @@
 ---
 name: iac-compliance
-description: Ensure infrastructure code compliance with security standards
+description: Master IaC compliance (CIS, PCI DSS, HIPAA, SOC2, GDPR). Use when writing Terraform/CloudFormation, defining security policies, implementing compliance controls, auditing infrastructure, or ensuring regulatory adherence.
 allowed-tools: Read, Grep
 ---
 
 # Infrastructure as Code Compliance Skill
+
+Master infrastructure compliance standards and automatically validate IaC against security frameworks including CIS Benchmarks, PCI DSS, HIPAA, SOC2, and GDPR requirements.
+
+## When to Use This Skill
+
+Use this skill when:
+
+1. Writing or editing Terraform configurations
+2. Creating CloudFormation templates
+3. Defining infrastructure security policies
+4. Implementing compliance controls
+5. Auditing existing infrastructure code
+6. Preparing for compliance audits
+7. Implementing cloud security best practices
+8. Setting up new cloud environments
+9. Migrating workloads to the cloud
+10. Reviewing infrastructure pull requests
+11. Implementing zero-trust architecture
+12. Configuring encryption and access controls
+13. Setting up logging and monitoring
+14. Implementing data residency requirements
+15. Documenting compliance posture
+
+## Quick Start
+
+This skill automatically validates IaC for compliance as you write:
+
+```hcl
+# You write:
+resource "google_compute_firewall" "web" {
+  allow {
+    protocol = "tcp"
+    ports    = ["0-65535"]  # Too permissive
+  }
+  source_ranges = ["0.0.0.0/0"]  # Public access
+}
+
+# Skill alerts:
+❌ CIS 3.6: Firewall rule too permissive
+❌ PCI DSS 1.2.1: Unrestricted inbound access
+✓  Suggested fix: Restrict to specific ports and IPs
+
+# Auto-suggested compliant version:
+resource "google_compute_firewall" "web" {
+  allow {
+    protocol = "tcp"
+    ports    = ["443"]  # HTTPS only
+  }
+  source_ranges = ["10.0.0.0/8"]  # Internal only
+}
+```
 
 ## Purpose
 This skill automatically validates infrastructure code against security standards and compliance requirements, ensuring adherence to industry best practices and regulatory frameworks.
@@ -394,5 +445,418 @@ High Priority Remediation:
 Compliance Score: B+ (87%)
 Next Audit: 30 days
 ```
+
+## Real-World Applications
+
+### Healthcare Provider (HIPAA Compliance)
+
+**Scenario:** Hospital deploying patient records system on GCP
+
+```hcl
+# terraform/hipaa-compliant-storage.tf
+resource "google_storage_bucket" "patient_records" {
+  name     = "hospital-patient-records"
+  location = "US"
+
+  # HIPAA: Encryption at rest
+  encryption {
+    default_kms_key_name = google_kms_crypto_key.hipaa.id
+  }
+
+  # HIPAA: Access logging
+  logging {
+    log_bucket = google_storage_bucket.audit_logs.name
+  }
+
+  # HIPAA: Versioning for data integrity
+  versioning {
+    enabled = true
+  }
+
+  # HIPAA: Lifecycle policies
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+    condition {
+      age = 2555  # 7 years retention
+    }
+  }
+
+  # Block public access
+  uniform_bucket_level_access = true
+}
+
+# Audit logging
+resource "google_storage_bucket" "audit_logs" {
+  name     = "hospital-audit-logs"
+  location = "US"
+
+  retention_policy {
+    retention_period = 220752000  # 7 years in seconds
+    is_locked        = true
+  }
+}
+```
+
+### Financial Institution (PCI DSS Compliance)
+
+**Scenario:** Payment processing service requiring PCI DSS compliance
+
+```hcl
+# terraform/pci-dss-network.tf
+resource "google_compute_network" "payment_vpc" {
+  name                    = "payment-processing"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "payment_subnet" {
+  name          = "payment-subnet"
+  ip_cidr_range = "10.0.1.0/24"
+  region        = "us-central1"
+  network       = google_compute_network.payment_vpc.id
+
+  # PCI DSS: Enable flow logs
+  log_config {
+    aggregation_interval = "INTERVAL_5_SEC"
+    flow_sampling        = 1.0
+    metadata             = "INCLUDE_ALL_METADATA"
+  }
+}
+
+# PCI DSS: Network segmentation
+resource "google_compute_firewall" "deny_all_ingress" {
+  name    = "deny-all-ingress"
+  network = google_compute_network.payment_vpc.name
+
+  deny {
+    protocol = "all"
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+  priority      = 65535
+}
+
+resource "google_compute_firewall" "allow_payment_api" {
+  name    = "allow-payment-api"
+  network = google_compute_network.payment_vpc.name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["443"]  # Only HTTPS
+  }
+
+  source_ranges = ["10.0.0.0/8"]
+  target_tags   = ["payment-api"]
+  priority      = 1000
+}
+```
+
+### SaaS Company (SOC 2 Type II Compliance)
+
+**Scenario:** Multi-tenant SaaS application requiring SOC 2
+
+```hcl
+# terraform/soc2-compliant-infrastructure.tf
+module "soc2_compliant_gke" {
+  source = "./modules/compliant-gke"
+
+  cluster_name = "production-cluster"
+  region       = "us-central1"
+
+  # SOC 2: Enable audit logging
+  logging_config {
+    enable_components = ["SYSTEM_COMPONENTS", "WORKLOADS"]
+  }
+
+  # SOC 2: Enable monitoring
+  monitoring_config {
+    enable_components = ["SYSTEM_COMPONENTS"]
+    managed_prometheus {
+      enabled = true
+    }
+  }
+
+  # SOC 2: Binary authorization
+  binary_authorization {
+    evaluation_mode = "PROJECT_SINGLETON_POLICY_ENFORCE"
+  }
+
+  # SOC 2: Network policies
+  network_policy {
+    enabled  = true
+    provider = "CALICO"
+  }
+
+  # SOC 2: Pod security policies
+  pod_security_policy_config {
+    enabled = true
+  }
+
+  # SOC 2: Workload identity
+  workload_identity_config {
+    workload_pool = "${var.project_id}.svc.id.goog"
+  }
+}
+```
+
+## Best Practices
+
+### Policy as Code
+- Store compliance policies in version control
+- Use tools like OPA, Checkov, tfsec for automated validation
+- Integrate compliance checks in CI/CD pipelines
+- Version and document all policy changes
+
+### Separation of Concerns
+- Separate production and development environments
+- Use different projects/accounts per environment
+- Implement least privilege access
+- Enforce network segmentation
+
+### Audit and Monitoring
+- Enable comprehensive audit logging
+- Monitor compliance drift continuously
+- Set up alerts for compliance violations
+- Maintain audit logs for required retention periods
+
+### Encryption
+- Encrypt data at rest with customer-managed keys
+- Encrypt data in transit (TLS 1.2+)
+- Rotate encryption keys regularly
+- Store keys separately from data
+
+### Access Control
+- Implement MFA for all privileged access
+- Use service accounts with minimal permissions
+- Regularly review and revoke unused access
+- Maintain access logs for auditing
+
+### Documentation
+- Document compliance mappings (controls → resources)
+- Maintain runbooks for compliance procedures
+- Keep evidence of compliance activities
+- Update documentation with infrastructure changes
+
+## Common Pitfalls
+
+### ❌ Hardcoded Secrets in IaC
+
+**Problem:**
+```hcl
+resource "google_sql_database_instance" "main" {
+  name = "production-db"
+
+  settings {
+    user_name     = "admin"
+    user_password = "hardcoded_password_123"  # CRITICAL VIOLATION!
+  }
+}
+```
+
+**Solution:** Use secret management
+```hcl
+resource "google_secret_manager_secret" "db_password" {
+  secret_id = "db-password"
+
+  replication {
+    automatic = true
+  }
+}
+
+resource "google_sql_database_instance" "main" {
+  name = "production-db"
+  # Password retrieved from Secret Manager at runtime
+}
+```
+
+### ❌ Public Storage Buckets
+
+**Problem:**
+```hcl
+resource "google_storage_bucket" "data" {
+  name     = "company-data"
+  location = "US"
+  # No access controls - publicly accessible!
+}
+```
+
+**Solution:** Enforce private access
+```hcl
+resource "google_storage_bucket" "data" {
+  name     = "company-data"
+  location = "US"
+
+  uniform_bucket_level_access = true
+  public_access_prevention    = "enforced"
+
+  iam_binding {
+    role    = "roles/storage.objectViewer"
+    members = ["serviceAccount:app@project.iam.gserviceaccount.com"]
+  }
+}
+```
+
+### ❌ Missing Encryption
+
+**Problem:**
+```hcl
+resource "google_compute_disk" "data" {
+  name = "application-data"
+  # Uses Google-managed encryption - not compliant for some regulations
+}
+```
+
+**Solution:** Use customer-managed encryption keys
+```hcl
+resource "google_kms_key_ring" "compliance" {
+  name     = "compliance-keys"
+  location = "us-central1"
+}
+
+resource "google_kms_crypto_key" "data_key" {
+  name     = "data-encryption-key"
+  key_ring = google_kms_key_ring.compliance.id
+
+  rotation_period = "7776000s"  # 90 days
+}
+
+resource "google_compute_disk" "data" {
+  name = "application-data"
+
+  disk_encryption_key {
+    kms_key_self_link = google_kms_crypto_key.data_key.id
+  }
+}
+```
+
+### ❌ Disabled Audit Logging
+
+**Problem:**
+```hcl
+# No audit logging configuration
+# Fails compliance requirements
+```
+
+**Solution:** Enable comprehensive audit logging
+```hcl
+resource "google_project_iam_audit_config" "project" {
+  project = var.project_id
+  service = "allServices"
+
+  audit_log_config {
+    log_type = "ADMIN_READ"
+  }
+  audit_log_config {
+    log_type = "DATA_READ"
+  }
+  audit_log_config {
+    log_type = "DATA_WRITE"
+  }
+}
+```
+
+### ❌ Overly Permissive Firewall Rules
+
+**Problem:**
+```hcl
+resource "google_compute_firewall" "allow_all" {
+  name    = "allow-all"
+  network = google_compute_network.vpc.name
+
+  allow {
+    protocol = "all"
+  }
+
+  source_ranges = ["0.0.0.0/0"]  # CRITICAL: Open to internet!
+}
+```
+
+**Solution:** Implement least privilege network access
+```hcl
+resource "google_compute_firewall" "allow_specific" {
+  name    = "allow-https-from-lb"
+  network = google_compute_network.vpc.name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["443"]
+  }
+
+  source_ranges = ["10.0.0.0/8"]  # Internal only
+  target_tags   = ["web-server"]
+}
+```
+
+### ❌ No Compliance Drift Detection
+
+**Problem:** Infrastructure changes made manually without validation
+
+**Solution:** Implement continuous compliance monitoring
+```yaml
+# .github/workflows/compliance-check.yml
+name: Compliance Check
+
+on:
+  push:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+
+jobs:
+  compliance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run compliance checks
+        run: |
+          # Check Terraform files
+          tfsec .
+
+          # Check for policy violations
+          checkov -d . --framework terraform
+
+          # Custom compliance rules
+          opa test ./policies/
+```
+
+### ❌ Missing Data Retention Policies
+
+**Problem:**
+```hcl
+resource "google_storage_bucket" "logs" {
+  name = "application-logs"
+  # No retention policy - might violate compliance
+}
+```
+
+**Solution:** Implement required retention
+```hcl
+resource "google_storage_bucket" "logs" {
+  name = "application-logs"
+
+  retention_policy {
+    retention_period = 220752000  # 7 years for financial data
+    is_locked        = true        # Cannot be reduced
+  }
+
+  lifecycle_rule {
+    action {
+      type          = "SetStorageClass"
+      storage_class = "ARCHIVE"
+    }
+    condition {
+      age = 90  # Move to archive after 90 days
+    }
+  }
+}
+```
+
+## Related Skills
+
+- **helm-validator**: Ensures Kubernetes deployments meet compliance
+- **docker-security**: Validates container security compliance
+- **gcp-cost-guard**: Optimizes costs while maintaining compliance
+- **k8s-optimizer**: Ensures Kubernetes resources follow security best practices
 
 This skill ensures infrastructure code meets all relevant compliance standards and security best practices, reducing risk and ensuring regulatory adherence.

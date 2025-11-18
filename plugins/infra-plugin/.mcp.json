@@ -5,11 +5,6 @@
       "args": ["../../mcp-servers/docs-index/server.py"],
       "description": "Curated documentation index for infrastructure topics"
     },
-    "fetch": {
-      "command": "uvx",
-      "args": ["mcp-server-fetch"],
-      "description": "Web fetching for documentation URLs from docs-index"
-    },
     "gcloud": {
       "command": "npx",
       "args": ["-y", "@google-cloud/gcloud-mcp"],

@@ -1,10 +1,82 @@
 ---
 name: k8s-optimizer
-description: Optimize Kubernetes resource definitions automatically
+description: Master Kubernetes optimization. Use when creating YAML files, editing Deployments/StatefulSets, defining Services/Ingresses, working with resource definitions, or ensuring production readiness.
 allowed-tools: Read, Edit
 ---
 
 # Kubernetes Optimizer Skill
+
+Master Kubernetes resource optimization to ensure optimal utilization, high availability, and production-ready configurations for all Kubernetes workloads.
+
+## When to Use This Skill
+
+Use this skill when:
+
+1. Creating Kubernetes YAML manifest files
+2. Editing Deployments, StatefulSets, or DaemonSets
+3. Defining Services or Ingresses
+4. Working with any Kubernetes resource definitions
+5. Implementing autoscaling configurations
+6. Setting up pod disruption budgets
+7. Configuring health probes and readiness checks
+8. Defining resource limits and requests
+9. Implementing pod anti-affinity rules
+10. Creating network policies
+11. Deploying stateful applications
+12. Optimizing CI/CD deployment pipelines
+13. Troubleshooting resource contention issues
+14. Migrating applications to Kubernetes
+15. Reviewing Kubernetes manifests for production readiness
+
+## Quick Start
+
+This skill automatically optimizes manifests as you create them:
+
+```yaml
+# You write:
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+spec:
+  containers:
+  - name: app
+    image: myapp:1.0
+
+# Skill auto-enhances:
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+spec:
+  replicas: 2  # Added for HA
+  containers:
+  - name: app
+    image: myapp:1.0
+    # Auto-added resource limits
+    resources:
+      requests:
+        cpu: 250m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    # Auto-added health probes
+    livenessProbe:
+      httpGet:
+        path: /health
+        port: 8080
+    readinessProbe:
+      httpGet:
+        path: /ready
+        port: 8080
+    # Auto-added security context
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+
+✅ Optimizations applied: Resource limits, health probes, security context
+```
 
 ## Purpose
 This skill automatically activates when creating or editing Kubernetes manifests to ensure optimal resource utilization, high availability, and production readiness.
@@ -343,5 +415,500 @@ Estimated improvements:
 - Security score: A+ rating
 - Cost optimization: -30% resource waste
 ```
+
+## Real-World Applications
+
+### High-Traffic Web Application
+
+**Scenario:** E-commerce platform handling millions of requests
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-frontend
+spec:
+  replicas: 10  # High availability
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 3
+      maxUnavailable: 0  # Zero downtime deployments
+
+  template:
+    spec:
+      # Spread across zones for disaster recovery
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app: web-frontend
+
+      containers:
+      - name: web
+        image: company/web:v2.5.0
+        # Right-sized resources based on metrics
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: 1000m
+            memory: 2Gi
+
+        # Comprehensive health checks
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          failureThreshold: 3
+
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+        # Graceful shutdown
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 15"]
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: web-frontend-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: web-frontend
+  minReplicas: 10
+  maxReplicas: 100
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 10  # Scale down slowly
+        periodSeconds: 60
+```
+
+### Stateful Database Workload
+
+**Scenario:** PostgreSQL database cluster with high availability
+
+```yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+spec:
+  serviceName: postgres
+  replicas: 3  # Primary + 2 replicas
+
+  template:
+    spec:
+      # Anti-affinity to spread across nodes
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - postgres
+            topologyKey: kubernetes.io/hostname
+
+      containers:
+      - name: postgres
+        image: postgres:15
+        # Database-optimized resources
+        resources:
+          requests:
+            cpu: 2000m
+            memory: 4Gi
+          limits:
+            cpu: 4000m
+            memory: 8Gi
+
+        # Persistent storage
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/postgresql/data
+
+        # Database health checks
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: fast-ssd
+      resources:
+        requests:
+          storage: 100Gi
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: postgres-pdb
+spec:
+  minAvailable: 2  # Always keep 2 replicas running
+  selector:
+    matchLabels:
+      app: postgres
+```
+
+### Microservices with Service Mesh
+
+**Scenario:** Complex microservices architecture
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+spec:
+  replicas: 5
+
+  template:
+    metadata:
+      annotations:
+        # Istio sidecar injection
+        sidecar.istio.io/inject: "true"
+        # Prometheus scraping
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+
+    spec:
+      serviceAccountName: payment-service
+
+      containers:
+      - name: payment
+        image: company/payment-service:v3.2.1
+        # Optimized for fast transactions
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 2Gi
+          limits:
+            cpu: 2000m
+            memory: 4Gi
+
+        # Transaction health checks
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 45
+          timeoutSeconds: 5
+
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 3
+
+        # Sensitive env vars from secrets
+        envFrom:
+        - secretRef:
+            name: payment-secrets
+
+        # Security hardening
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: payment-service-netpol
+spec:
+  podSelector:
+    matchLabels:
+      app: payment-service
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: api-gateway
+    ports:
+    - protocol: TCP
+      port: 8080
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgres
+    ports:
+    - protocol: TCP
+      port: 5432
+```
+
+## Best Practices
+
+### Resource Management
+- Always define resource requests and limits
+- Set requests based on actual usage (p50-p90)
+- Set limits at p99 + 20% headroom
+- Use Vertical Pod Autoscaler for initial sizing
+
+### High Availability
+- Run at least 3 replicas for critical services
+- Use Pod Disruption Budgets to prevent outages
+- Implement liveness and readiness probes
+- Spread replicas across availability zones
+
+### Security
+- Never run containers as root
+- Use read-only root filesystems
+- Drop all capabilities, add only required ones
+- Scan images for vulnerabilities regularly
+
+### Observability
+- Add meaningful labels for filtering/grouping
+- Implement structured logging to stdout
+- Export Prometheus metrics
+- Use distributed tracing for microservices
+
+### Configuration
+- Store secrets in Kubernetes Secrets, not ConfigMaps
+- Use external secret management (Vault, GCP Secret Manager)
+- Version all manifests in Git
+- Use Kustomize or Helm for environment differences
+
+## Common Pitfalls
+
+### ❌ No Resource Limits
+
+**Problem:**
+```yaml
+containers:
+- name: app
+  image: myapp:latest
+  # No resources - can OOM the node!
+```
+
+**Solution:** Always set resource limits
+```yaml
+containers:
+- name: app
+  image: myapp:latest
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "500m"
+```
+
+### ❌ Running as Root
+
+**Problem:**
+```yaml
+containers:
+- name: app
+  image: myapp:latest
+  # Runs as root by default - security risk!
+```
+
+**Solution:** Run as non-root user
+```yaml
+containers:
+- name: app
+  image: myapp:latest
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    capabilities:
+      drop:
+        - ALL
+```
+
+### ❌ Missing Health Probes
+
+**Problem:**
+```yaml
+containers:
+- name: app
+  image: myapp:latest
+  # No probes - K8s doesn't know if app is healthy!
+```
+
+**Solution:** Add liveness and readiness probes
+```yaml
+containers:
+- name: app
+  image: myapp:latest
+  livenessProbe:
+    httpGet:
+      path: /healthz
+      port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  readinessProbe:
+    httpGet:
+      path: /ready
+      port: 8080
+    initialDelaySeconds: 5
+    periodSeconds: 5
+```
+
+### ❌ Single Replica for Critical Services
+
+**Problem:**
+```yaml
+spec:
+  replicas: 1  # Single point of failure!
+```
+
+**Solution:** Run multiple replicas with PDB
+```yaml
+spec:
+  replicas: 3  # High availability
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: myapp-pdb
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: myapp
+```
+
+### ❌ Latest Image Tag
+
+**Problem:**
+```yaml
+containers:
+- name: app
+  image: myapp:latest  # Unpredictable, can break deployments!
+```
+
+**Solution:** Use specific version tags
+```yaml
+containers:
+- name: app
+  image: myapp:v1.2.3  # Reproducible deployments
+  imagePullPolicy: IfNotPresent
+```
+
+### ❌ No Pod Disruption Budget
+
+**Problem:** Cluster autoscaler or manual drains evict all pods at once
+
+**Solution:** Define PDB to maintain availability
+```yaml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: critical-app-pdb
+spec:
+  maxUnavailable: 1  # Only one pod can be down
+  selector:
+    matchLabels:
+      app: critical-app
+```
+
+### ❌ Storing Secrets in ConfigMaps
+
+**Problem:**
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  database_password: "secret123"  # Plain text!
+```
+
+**Solution:** Use Secrets with encryption at rest
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: app-secrets
+type: Opaque
+data:
+  database_password: c2VjcmV0MTIz  # Base64 encoded
+```
+
+### ❌ Not Setting Priority Class
+
+**Problem:** All pods have same priority during resource pressure
+
+**Solution:** Set priority for critical workloads
+```yaml
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: high-priority
+value: 1000
+---
+spec:
+  priorityClassName: high-priority  # Won't be evicted first
+  containers:
+  - name: critical-app
+```
+
+## Related Skills
+
+- **helm-validator**: Optimizes Helm charts containing Kubernetes manifests
+- **gcp-cost-guard**: Ensures resource limits are cost-effective
+- **iac-compliance**: Validates Kubernetes configs meet security standards
+- **docker-security**: Ensures container images are secure
 
 This skill ensures that every Kubernetes resource is optimized for production use, improving reliability, security, and cost-effectiveness.

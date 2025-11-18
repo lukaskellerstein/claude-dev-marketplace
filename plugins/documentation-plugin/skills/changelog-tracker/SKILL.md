@@ -1,9 +1,48 @@
 ---
 name: changelog-tracker
-description: Track changes and suggest changelog entries following Keep a Changelog format
+description: Master Keep a Changelog format. Use when making code changes, adding features, fixing bugs, updating dependencies, making breaking changes, creating commits, or preparing releases.
 ---
 
 # Changelog Tracker Skill
+
+Master the Keep a Changelog format and Semantic Versioning principles to automatically track changes and suggest appropriate changelog entries for all code modifications.
+
+## When to Use This Skill
+
+Use this skill when:
+
+1. Adding new features or capabilities to the codebase
+2. Fixing bugs or resolving issues
+3. Making breaking changes to APIs or interfaces
+4. Updating dependencies or third-party libraries
+5. Deprecating existing functionality
+6. Removing features or capabilities
+7. Addressing security vulnerabilities
+8. Before committing changes to version control
+9. Creating or reviewing pull requests
+10. Preparing for a new release
+11. Refactoring code with user-facing impacts
+12. Improving performance significantly
+13. Updating configuration file formats
+14. Changing default behavior
+15. Documenting changes for team communication
+
+## Quick Start
+
+This skill automatically activates when code changes are detected. It analyzes your changes and suggests appropriate changelog entries:
+
+```bash
+# After making changes, the skill suggests:
+📝 Suggested Changelog Entry:
+
+### Added
+- GraphQL API support with queries, mutations, and subscriptions
+- Export functionality for CSV and JSON formats
+
+📊 Version Impact: MINOR (1.2.0 → 1.3.0)
+
+Add to CHANGELOG.md under [Unreleased] section.
+```
 
 ## Auto-Invocation Contexts
 
@@ -387,6 +426,78 @@ Auto-populate PR description with changelog entry:
 - [ ] PATCH (bug fix)
 ```
 
+## Real-World Applications
+
+### Microservice Release
+
+**Scenario:** Releasing a new version of a payment processing microservice
+
+```markdown
+## [2.0.0] - 2024-01-15
+
+### Added
+- Support for Apple Pay and Google Pay payment methods
+- Webhook retry mechanism with exponential backoff
+- Real-time payment status notifications
+
+### Changed
+- Improved error handling with more specific error codes
+- Enhanced logging for payment transaction tracking
+
+### Fixed
+- Race condition in concurrent payment processing
+- Incorrect tax calculation for international transactions
+
+### Security
+- Updated payment gateway SDK to address CVE-2024-1234
+- Implemented rate limiting for payment API endpoints
+```
+
+### Library Update
+
+**Scenario:** Publishing a new version of a JavaScript utility library
+
+```markdown
+## [1.5.0] - 2024-01-15
+
+### Added
+- `deepMerge()` utility for nested object merging
+- TypeScript type definitions for all functions
+- Tree-shaking support for smaller bundle sizes
+
+### Changed
+- Improved performance of `debounce()` by 40%
+- Updated error messages to be more descriptive
+
+### Deprecated
+- `merge()` function (use `deepMerge()` instead, will be removed in v2.0.0)
+```
+
+### API Version Update
+
+**Scenario:** Releasing a new API version with breaking changes
+
+```markdown
+## [3.0.0] - 2024-01-15
+
+### Added
+- GraphQL API support alongside REST
+- Pagination support for all list endpoints
+- Filtering and sorting capabilities
+
+### Changed
+- All timestamps now use ISO 8601 format instead of Unix timestamps
+- Error responses now include correlation IDs for debugging
+
+### Removed
+- `/api/v1/*` endpoints (use `/api/v3/*` instead)
+- Support for API keys (use OAuth 2.0 tokens instead)
+- XML response format (JSON only)
+
+### Migration Guide
+See MIGRATION.md for detailed upgrade instructions from v2.x to v3.x
+```
+
 ## Best Practices
 
 ### Entry Quality
@@ -452,5 +563,105 @@ Suggest changelog entries in this format:
 
 Add to CHANGELOG.md under [Unreleased] section.
 ```
+
+## Common Pitfalls
+
+### ❌ Documenting Internal Changes
+
+**Problem:**
+```markdown
+### Changed
+- Refactored UserService class hierarchy
+- Moved utility functions to separate module
+- Updated import statements
+```
+
+**Solution:** Only document user-facing changes
+```markdown
+### Changed
+- Improved user profile loading speed by 40%
+```
+
+### ❌ Vague Descriptions
+
+**Problem:**
+```markdown
+### Fixed
+- Fixed bug
+- Updated stuff
+- Improved things
+```
+
+**Solution:** Be specific
+```markdown
+### Fixed
+- Corrected timezone handling in date picker
+- Resolved memory leak in WebSocket connections
+- Fixed validation error with international phone numbers
+```
+
+### ❌ Wrong Categories
+
+**Problem:**
+```markdown
+### Changed
+- Added GraphQL support  ← Should be "Added"
+```
+
+**Solution:** Use correct category
+```markdown
+### Added
+- GraphQL API support alongside REST
+```
+
+### ❌ Missing Breaking Change Warnings
+
+**Problem:**
+```markdown
+### Changed
+- Updated authentication to use OAuth 2.0 only
+```
+
+**Solution:** Flag breaking changes prominently
+```markdown
+### Removed
+- **BREAKING:** API key authentication (use OAuth 2.0 instead)
+```
+
+### ❌ Including Every Commit
+
+**Problem:** Creating changelog entry for every minor commit or internal change
+
+**Solution:** Group related changes and focus on user impact:
+```markdown
+### Added
+- Comprehensive user export functionality (CSV, JSON, Excel formats)
+  (Instead of listing 10 commits for each format and fix)
+```
+
+### ❌ Incorrect Version Impact
+
+**Problem:** Marking new feature as PATCH or bug fix as MAJOR
+
+**Solution:** Follow semantic versioning strictly:
+- **MAJOR**: Breaking changes, removed features
+- **MINOR**: New features, new deprecations
+- **PATCH**: Bug fixes, security patches
+
+### ❌ Poor Timing
+
+**Problem:** Adding changelog entries after release or forgetting entirely
+
+**Solution:** Make it part of development workflow:
+- Add entry with each PR
+- Review during code review
+- Verify before release
+
+## Related Skills
+
+- **markdown-formatter**: Ensures changelog entries follow proper markdown formatting
+- **inline-doc-generator**: Documents code changes that trigger changelog entries
+- **git-commit-helper**: Coordinates with conventional commit messages
+- **release-notes-generator**: Expands changelog entries into detailed release notes
 
 Follow the Keep a Changelog format defined in `DOCUMENTATION_STANDARDS.md`.

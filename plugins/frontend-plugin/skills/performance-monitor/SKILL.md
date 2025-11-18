@@ -1,12 +1,50 @@
 ---
 name: performance-monitor
-description: Monitors performance patterns and suggests optimizations
+description: Master React performance optimization for faster, more efficient applications. Use when detecting performance bottlenecks, optimizing re-renders, reducing bundle size, or improving Core Web Vitals in React applications.
 allowed-tools: Read, Grep
 ---
 
 # Performance Monitor Skill
 
 Automatically detect performance issues and suggest optimizations during development.
+
+## When to Use This Skill
+
+This skill automatically activates and provides assistance in these specific scenarios:
+
+1. **Large Component Detection** - When components exceed 200 lines of code
+2. **Multiple State Variables** - When components have more than 5 useState calls
+3. **Effect Overload** - When components have more than 3 useEffect hooks
+4. **Large Dependency Arrays** - When useEffect has more than 5 dependencies
+5. **Inline Functions in JSX** - Detecting performance-killing inline handlers
+6. **Missing Memoization** - Complex components without React.memo
+7. **Heavy Library Imports** - Detecting large libraries like lodash, moment, or icon packs
+8. **Large List Rendering** - Arrays with 100+ items without virtualization
+9. **Missing Keys in Lists** - List items without proper key props
+10. **Unoptimized Images** - Images without lazy loading or responsive formats
+11. **State Management Issues** - Unnecessary state lifting or monolithic state objects
+12. **Bundle Size Concerns** - When imports exceed recommended size budgets
+13. **Memory Leaks** - Detecting unmounted component state updates
+14. **Animation Performance** - Non-compositor animations causing jank
+15. **Web Vitals Violations** - When Core Web Vitals metrics are degraded
+
+## Quick Start
+
+### Step 1: Automatic Detection
+The skill automatically monitors your code as you write. No manual activation needed.
+
+### Step 2: Review Suggestions
+When performance issues are detected, you'll receive:
+- Clear issue identification with line numbers
+- Performance impact assessment
+- Specific code examples for fixes
+- Expected improvement metrics
+
+### Step 3: Apply Optimizations
+Follow the provided code examples to implement optimizations. The skill tracks:
+- Re-render counts
+- Bundle size impacts
+- Web Vitals improvements
 
 ## Auto-invocation Triggers
 
@@ -134,7 +172,7 @@ import Dashboard from './Dashboard';
 import Analytics from './Analytics';
 import Reports from './Reports';
 
-// ✅ Lazy loading
+// ✅ Lazy loading with React 18 Suspense
 const Dashboard = lazy(() => import('./Dashboard'));
 const Analytics = lazy(() => import('./Analytics'));
 const Reports = lazy(() => import('./Reports'));
@@ -178,6 +216,18 @@ async function loadAdvancedFeatures() {
   }
   return null;
 }
+
+// Route-based code splitting
+const routes = [
+  {
+    path: '/admin',
+    component: lazy(() => import('./pages/Admin')),
+  },
+  {
+    path: '/dashboard',
+    component: lazy(() => import('./pages/Dashboard')),
+  },
+];
 ```
 
 ## List Virtualization
@@ -206,6 +256,20 @@ import { FixedSizeList } from 'react-window';
     </div>
   )}
 </FixedSizeList>
+
+// ✅ Variable size list
+import { VariableSizeList } from 'react-window';
+
+<VariableSizeList
+  height={600}
+  itemCount={items.length}
+  itemSize={(index) => items[index].height}
+  width="100%"
+>
+  {({ index, style }) => (
+    <div style={style}>{items[index].content}</div>
+  )}
+</VariableSizeList>
 ```
 
 ## Image Optimization
@@ -215,7 +279,7 @@ import { FixedSizeList } from 'react-window';
 // ❌ Loading all images immediately
 <img src={imageUrl} alt="Product" />
 
-// ✅ Lazy loading
+// ✅ Native lazy loading
 <img
   src={imageUrl}
   alt="Product"
@@ -223,7 +287,7 @@ import { FixedSizeList } from 'react-window';
   decoding="async"
 />
 
-// ✅ With placeholder
+// ✅ Progressive image loading with placeholder
 const [imageSrc, setImageSrc] = useState(placeholder);
 
 useEffect(() => {
@@ -319,6 +383,102 @@ interface ImportMetrics {
 }
 ```
 
+## Real-World Applications
+
+### Example 1: Dashboard Performance Optimization
+```tsx
+// Before: Slow dashboard with 30+ widgets
+function Dashboard() {
+  const [data, setData] = useState({});
+  const widgets = generateWidgets(data); // Heavy computation
+
+  return (
+    <div>
+      {widgets.map(w => <Widget key={w.id} {...w} />)}
+    </div>
+  );
+}
+
+// After: Optimized with React 18 concurrent features
+function Dashboard() {
+  const [data, setData] = useState({});
+
+  // Split data fetching
+  const { widgets } = useDeferredValue(data);
+
+  // Memoize expensive computation
+  const processedWidgets = useMemo(
+    () => generateWidgets(widgets),
+    [widgets]
+  );
+
+  return (
+    <Suspense fallback={<DashboardSkeleton />}>
+      <div>
+        {processedWidgets.map(w => (
+          <Widget key={w.id} {...w} />
+        ))}
+      </div>
+    </Suspense>
+  );
+}
+
+const Widget = memo(({ id, data, onUpdate }) => {
+  const handleUpdate = useCallback(
+    (newData) => onUpdate(id, newData),
+    [id, onUpdate]
+  );
+
+  return <div onClick={handleUpdate}>{data.title}</div>;
+});
+```
+
+### Example 2: E-commerce Product List
+```tsx
+// Before: Rendering 1000+ products
+function ProductList({ products }) {
+  return (
+    <div className="grid">
+      {products.map(p => (
+        <ProductCard key={p.id} product={p} />
+      ))}
+    </div>
+  );
+}
+
+// After: Virtualized with intersection observer
+import { FixedSizeGrid } from 'react-window';
+
+function ProductList({ products }) {
+  const columnCount = useBreakpointValue({ base: 1, md: 2, lg: 3 });
+  const rowCount = Math.ceil(products.length / columnCount);
+
+  return (
+    <FixedSizeGrid
+      columnCount={columnCount}
+      columnWidth={300}
+      height={800}
+      rowCount={rowCount}
+      rowHeight={400}
+      width={1200}
+    >
+      {({ columnIndex, rowIndex, style }) => {
+        const index = rowIndex * columnCount + columnIndex;
+        const product = products[index];
+
+        if (!product) return null;
+
+        return (
+          <div style={style}>
+            <ProductCard product={product} />
+          </div>
+        );
+      }}
+    </FixedSizeGrid>
+  );
+}
+```
+
 ## Optimization Suggestions
 
 ### Immediate Actions
@@ -326,7 +486,7 @@ interface ImportMetrics {
 🚀 Performance Optimization Detected
 
 **Issue**: Component re-renders 8 times on data update
-**Location**: Dashboard.tsx
+**Location**: Dashboard.tsx:45
 **Impact**: High - Causes layout thrashing
 
 **Solution**:
@@ -366,12 +526,100 @@ module.exports = {
 };
 ```
 
+## Best Practices
+
+### 1. Memoization Strategy
+- Use `React.memo` for components that render often with same props
+- Use `useMemo` for expensive calculations
+- Use `useCallback` for functions passed to child components
+- Don't over-optimize - profile first!
+
+### 2. Code Splitting
+- Split routes with `React.lazy`
+- Use dynamic imports for heavy features
+- Implement proper loading states with `Suspense`
+- Prefetch critical routes on idle
+
+### 3. Bundle Optimization
+- Analyze bundle with webpack-bundle-analyzer
+- Tree-shake unused code
+- Use modern formats (ES modules)
+- Implement proper caching strategies
+
+### 4. Image Strategy
+- Use modern formats (WebP, AVIF)
+- Implement responsive images
+- Lazy load below-the-fold images
+- Use CDN for image optimization
+
+### 5. State Management
+- Keep state as local as possible
+- Split unrelated state
+- Use reducers for complex state
+- Consider Zustand or Jotai for global state
+
+## Common Pitfalls
+
+### 1. Premature Optimization
+```tsx
+// ❌ Memoizing everything unnecessarily
+const name = useMemo(() => props.firstName + ' ' + props.lastName, [props.firstName, props.lastName]);
+
+// ✅ Simple operations don't need memoization
+const name = props.firstName + ' ' + props.lastName;
+```
+
+### 2. Broken Dependencies
+```tsx
+// ❌ Missing dependency causing stale closure
+useEffect(() => {
+  const timer = setInterval(() => {
+    setCount(count + 1); // count is stale
+  }, 1000);
+  return () => clearInterval(timer);
+}, []); // count missing from deps
+
+// ✅ Use functional update
+useEffect(() => {
+  const timer = setInterval(() => {
+    setCount(c => c + 1); // Always fresh
+  }, 1000);
+  return () => clearInterval(timer);
+}, []);
+```
+
+### 3. Inline Object/Array Props
+```tsx
+// ❌ New object on every render
+<Component config={{ theme: 'dark' }} />
+
+// ✅ Stable reference
+const config = useMemo(() => ({ theme: 'dark' }), []);
+<Component config={config} />
+```
+
+### 4. Over-nesting Components
+```tsx
+// ❌ Deep component tree
+<A><B><C><D><E><Component /></E></D></C></B></A>
+
+// ✅ Flatten when possible
+<Component />
+```
+
+### 5. Ignoring Web Vitals
+- Monitor LCP, FID, CLS regularly
+- Test on real devices, not just localhost
+- Use Chrome DevTools Performance tab
+- Implement RUM (Real User Monitoring)
+
 ## Monitoring Integration
 
 ### React DevTools Profiler
 - Identify components causing re-renders
 - Measure render duration
 - Find performance bottlenecks
+- Track component lifecycle
 
 ### Web Vitals
 ```typescript
@@ -399,3 +647,25 @@ useEffect(() => {
     );
   };
 }, []);
+```
+
+### React 18 Concurrent Features
+```tsx
+// useTransition for non-urgent updates
+const [isPending, startTransition] = useTransition();
+
+function handleClick() {
+  startTransition(() => {
+    setTab('posts'); // Non-urgent update
+  });
+}
+
+// useDeferredValue for deferred rendering
+const deferredQuery = useDeferredValue(searchQuery);
+```
+
+## Related Skills
+
+- **react-guardian**: Ensures React best practices and patterns
+- **style-assistant**: Optimizes CSS and styling performance
+- **test-writer**: Writes performance tests to catch regressions

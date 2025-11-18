@@ -1,9 +1,58 @@
 ---
 name: inline-doc-generator
-description: Auto-generate inline documentation (docstrings, JSDoc) when writing code
+description: Master inline documentation (JSDoc, TSDoc, GoDoc, Python docstrings). Use when creating functions/methods, defining classes/types, writing complex logic, creating APIs, defining data models, or writing public interfaces.
 ---
 
 # Inline Documentation Generator Skill
+
+Master inline documentation standards for all major programming languages, automatically generating high-quality docstrings, JSDoc comments, and API documentation as code is written.
+
+## When to Use This Skill
+
+Use this skill when:
+
+1. Creating new functions or methods
+2. Defining new classes or types
+3. Writing complex logic or algorithms
+4. Creating API endpoints or handlers
+5. Defining data models or schemas
+6. Writing public interfaces or APIs
+7. Implementing business logic functions
+8. Creating utility or helper functions
+9. Developing library or framework code
+10. Writing exported modules or packages
+11. Defining GraphQL resolvers or mutations
+12. Creating database queries or repositories
+13. Implementing authentication or authorization logic
+14. Writing webhook handlers or event processors
+15. Developing microservice endpoints
+
+## Quick Start
+
+This skill automatically generates documentation as you write code:
+
+```python
+# You write:
+def process_payment(order_id: str, amount: Decimal) -> PaymentResult:
+    pass
+
+# Skill suggests:
+def process_payment(order_id: str, amount: Decimal) -> PaymentResult:
+    """Process payment for an order.
+
+    Args:
+        order_id: Unique identifier of the order.
+        amount: Payment amount in the order's currency.
+
+    Returns:
+        PaymentResult containing transaction ID and status.
+
+    Raises:
+        ValueError: If amount is negative or zero.
+        PaymentError: If payment processing fails.
+    """
+    pass
+```
 
 ## Auto-Invocation Contexts
 
@@ -137,6 +186,67 @@ async function functionName(
 //	}
 //	fmt.Println(result)
 func FunctionName(param1 string, param2 int) (*Result, error) {
+    // implementation
+}
+```
+
+### Rust Documentation
+
+```rust
+/// Brief one-line description of function.
+///
+/// More detailed description if needed. Explain the purpose,
+/// behavior, and any important details.
+///
+/// # Arguments
+///
+/// * `param1` - Description of param1
+/// * `param2` - Description of param2
+///
+/// # Returns
+///
+/// Description of return value
+///
+/// # Errors
+///
+/// Returns an error if:
+/// - param1 is empty
+/// - param2 is negative
+///
+/// # Examples
+///
+/// ```
+/// let result = function_name("test", 42)?;
+/// println!("{:?}", result);
+/// ```
+///
+/// # Panics
+///
+/// This function panics if the internal state is invalid.
+pub fn function_name(param1: &str, param2: i32) -> Result<Value, Error> {
+    // implementation
+}
+```
+
+### Java (Javadoc)
+
+```java
+/**
+ * Brief one-line description of method.
+ * <p>
+ * More detailed description if needed. Explain the purpose,
+ * behavior, and any important details.
+ *
+ * @param param1 description of param1
+ * @param param2 description of param2
+ * @return description of return value
+ * @throws IllegalArgumentException if param1 is null or empty
+ * @throws IOException if file operation fails
+ * @see RelatedClass for related functionality
+ * @since 1.0
+ */
+public Result methodName(String param1, int param2)
+        throws IllegalArgumentException, IOException {
     // implementation
 }
 ```
@@ -284,6 +394,203 @@ async function createUser(req: Request, res: Response): Promise<void> {
 }
 ```
 
+## Real-World Applications
+
+### E-commerce Payment Processing
+
+**Scenario:** Documenting a payment processing function
+
+```python
+def process_refund(
+    transaction_id: str,
+    amount: Optional[Decimal] = None,
+    reason: str = "customer_request"
+) -> RefundResult:
+    """Process a refund for a previous transaction.
+
+    Initiates a refund for the specified transaction. If no amount is
+    provided, refunds the full transaction amount. Refunds are processed
+    asynchronously and may take 5-10 business days to complete.
+
+    Args:
+        transaction_id: ID of the original payment transaction.
+        amount: Partial refund amount. If None, refunds full amount.
+            Must not exceed original transaction amount.
+        reason: Reason for refund. One of: customer_request,
+            fraudulent, duplicate, product_not_received. Default is
+            customer_request.
+
+    Returns:
+        RefundResult containing:
+            - refund_id: Unique ID for this refund
+            - status: PENDING, PROCESSING, COMPLETED, or FAILED
+            - amount: Amount being refunded
+            - estimated_completion: Expected completion date
+
+    Raises:
+        TransactionNotFound: If transaction_id doesn't exist.
+        InvalidRefundAmount: If amount > original transaction amount.
+        RefundWindowExpired: If refund requested after 90-day window.
+        PaymentGatewayError: If payment gateway rejects refund.
+
+    Example:
+        >>> # Full refund
+        >>> result = process_refund("txn_abc123")
+        >>> print(result.status)
+        RefundStatus.PENDING
+
+        >>> # Partial refund
+        >>> result = process_refund(
+        ...     "txn_abc123",
+        ...     amount=Decimal("25.00"),
+        ...     reason="product_not_received"
+        ... )
+
+    Note:
+        - Refunds are final and cannot be reversed
+        - Refund fees may apply depending on payment method
+        - Customer will receive email notification when refund completes
+        - Original payment method must still be valid for refund
+
+    See Also:
+        - check_refund_eligibility(): Verify if refund is allowed
+        - get_refund_status(): Check status of pending refund
+    """
+    pass
+```
+
+### Data Processing Pipeline
+
+**Scenario:** Documenting a data transformation function
+
+```typescript
+/**
+ * Transform and validate customer data for import.
+ *
+ * Processes raw customer data from various sources (CSV, JSON, XML)
+ * and transforms it into a standardized format. Performs validation,
+ * deduplication, and enrichment before importing into the database.
+ *
+ * @param {RawCustomerData[]} rawData - Array of raw customer records
+ * @param {ImportOptions} options - Import configuration options
+ * @param {string} [options.source='manual'] - Data source identifier
+ * @param {boolean} [options.validateEmails=true] - Validate email addresses
+ * @param {boolean} [options.deduplicte=true] - Remove duplicate records
+ * @param {boolean} [options.enrichData=false] - Enrich with external data
+ * @param {ProgressCallback} [progressCallback] - Optional progress callback
+ * @returns {Promise<ImportResult>} Import result with statistics
+ *
+ * @throws {ValidationError} If data format is invalid
+ * @throws {DuplicateError} If critical duplicates found and deduplicate=false
+ * @throws {ExternalServiceError} If enrichment service unavailable
+ *
+ * @example
+ * // Basic import
+ * const result = await transformCustomerData(rawData, {
+ *   source: 'csv_upload',
+ *   validateEmails: true
+ * });
+ * console.log(`Imported ${result.successCount} customers`);
+ *
+ * @example
+ * // Import with progress tracking
+ * const result = await transformCustomerData(
+ *   rawData,
+ *   { enrichData: true },
+ *   (progress) => {
+ *     console.log(`Progress: ${progress.percent}%`);
+ *   }
+ * );
+ *
+ * @performance
+ * Processes approximately 1000 records per second.
+ * For large datasets (>100k records), consider batch processing.
+ *
+ * @since 2.0.0
+ */
+async function transformCustomerData(
+  rawData: RawCustomerData[],
+  options: ImportOptions = {},
+  progressCallback?: ProgressCallback
+): Promise<ImportResult> {
+  // implementation
+}
+```
+
+### Machine Learning Model
+
+**Scenario:** Documenting ML prediction function
+
+```python
+def predict_churn(
+    customer_id: str,
+    features: Optional[Dict[str, Any]] = None,
+    model_version: str = "latest"
+) -> ChurnPrediction:
+    """Predict customer churn probability using trained ML model.
+
+    Analyzes customer behavior and engagement metrics to predict
+    the likelihood of churn in the next 30 days. Uses ensemble
+    model combining XGBoost, Random Forest, and Neural Network.
+
+    Args:
+        customer_id: Unique customer identifier.
+        features: Optional feature overrides. If None, fetches
+            features from database. Useful for what-if analysis.
+        model_version: Model version to use. Default is "latest".
+            Use specific version (e.g., "v2.1.0") for reproducibility.
+
+    Returns:
+        ChurnPrediction containing:
+            - probability: Churn probability (0.0 to 1.0)
+            - risk_level: LOW, MEDIUM, or HIGH
+            - contributing_factors: Top 5 factors influencing prediction
+            - recommended_actions: Suggested retention strategies
+            - confidence: Model confidence score (0.0 to 1.0)
+
+    Raises:
+        CustomerNotFound: If customer_id doesn't exist.
+        ModelNotFound: If specified model_version doesn't exist.
+        FeatureExtractionError: If required features cannot be computed.
+
+    Example:
+        >>> prediction = predict_churn("cust_123")
+        >>> if prediction.risk_level == RiskLevel.HIGH:
+        ...     print(f"High churn risk: {prediction.probability:.1%}")
+        ...     for action in prediction.recommended_actions:
+        ...         print(f"  - {action}")
+
+    Example:
+        >>> # What-if analysis
+        >>> features = get_customer_features("cust_123")
+        >>> features["login_frequency"] *= 2  # Simulate more logins
+        >>> prediction = predict_churn("cust_123", features=features)
+        >>> print(f"Improved probability: {prediction.probability:.1%}")
+
+    Note:
+        - Model is retrained weekly with latest data
+        - Predictions are cached for 1 hour
+        - Feature computation may take 2-3 seconds for new customers
+        - Model performs best for customers with 90+ days of history
+
+    Performance:
+        - Average latency: 50ms (with cache hit)
+        - Average latency: 2.5s (with cache miss)
+        - Recommended rate limit: 100 requests/minute
+
+    Model Metrics (v3.2.0):
+        - AUC-ROC: 0.89
+        - Precision: 0.84
+        - Recall: 0.81
+        - F1-Score: 0.82
+
+    See Also:
+        - get_retention_strategies(): Get detailed retention plans
+        - compute_customer_lifetime_value(): Estimate CLV
+    """
+    pass
+```
+
 ## Best Practices
 
 1. **Be Concise**: First line should be brief and descriptive
@@ -329,5 +636,191 @@ Verify generated documentation:
 - [ ] Type information included
 - [ ] Grammar and spelling correct
 - [ ] Matches actual implementation
+
+## Common Pitfalls
+
+### ❌ Documenting Implementation Details
+
+**Problem:**
+```python
+def calculate_total(items):
+    """
+    Iterates through items list using a for loop,
+    creates a temporary sum variable initialized to 0,
+    then adds each item.price to sum...
+    """
+```
+
+**Solution:** Focus on what, not how
+```python
+def calculate_total(items):
+    """
+    Calculate the total price of all items.
+
+    Args:
+        items: List of Item objects with price attribute
+
+    Returns:
+        Decimal: Total price of all items
+    """
+```
+
+### ❌ Restating Function Name
+
+**Problem:**
+```typescript
+/**
+ * Gets the user
+ */
+function getUser(id: string): User
+```
+
+**Solution:** Provide meaningful information
+```typescript
+/**
+ * Retrieves user profile from database by ID.
+ *
+ * @param id - Unique user identifier (UUID)
+ * @returns User object with profile data
+ * @throws UserNotFoundError if user doesn't exist
+ */
+function getUser(id: string): User
+```
+
+### ❌ Missing Parameter Descriptions
+
+**Problem:**
+```python
+def send_email(to, subject, body):
+    """Sends an email."""
+```
+
+**Solution:** Document all parameters
+```python
+def send_email(to: str, subject: str, body: str) -> bool:
+    """
+    Send an email message via SMTP.
+
+    Args:
+        to: Recipient email address
+        subject: Email subject line
+        body: Email body content (plain text)
+
+    Returns:
+        True if email sent successfully, False otherwise
+    """
+```
+
+### ❌ Outdated Documentation
+
+**Problem:** Function signature changed but docs didn't update
+```typescript
+/**
+ * @param username - User's login name  ← Old parameter
+ */
+function login(email: string, password: string)  // ← New signature
+```
+
+**Solution:** Keep docs in sync with code
+```typescript
+/**
+ * Authenticate user with email and password.
+ *
+ * @param email - User's email address
+ * @param password - User's password (will be hashed)
+ * @returns Authentication token
+ */
+function login(email: string, password: string)
+```
+
+### ❌ Vague Return Descriptions
+
+**Problem:**
+```python
+def get_users():
+    """Returns users."""  # What format? What users?
+```
+
+**Solution:** Be specific about return value
+```python
+def get_users() -> List[User]:
+    """
+    Retrieve all active users from database.
+
+    Returns:
+        List of User objects ordered by creation date (newest first).
+        Returns empty list if no users found.
+    """
+```
+
+### ❌ No Exception Documentation
+
+**Problem:**
+```java
+/**
+ * Processes payment
+ */
+public void processPayment(Payment payment)  // Can throw multiple exceptions!
+```
+
+**Solution:** Document all exceptions
+```java
+/**
+ * Process a payment transaction through payment gateway.
+ *
+ * @param payment Payment details including amount and method
+ * @throws InsufficientFundsException if account balance too low
+ * @throws PaymentGatewayException if gateway is unavailable
+ * @throws InvalidPaymentException if payment data is invalid
+ */
+public void processPayment(Payment payment)
+```
+
+### ❌ Missing Examples for Complex APIs
+
+**Problem:**
+```python
+def transform_data(data, schema, options):
+    """Transforms data according to schema."""  # How do I use this?
+```
+
+**Solution:** Provide usage example
+```python
+def transform_data(data: dict, schema: Schema, options: TransformOptions) -> dict:
+    """
+    Transform data structure according to provided schema.
+
+    Args:
+        data: Source data dictionary
+        schema: Transformation schema defining mappings
+        options: Transform options (strict mode, defaults, etc.)
+
+    Returns:
+        Transformed data matching target schema
+
+    Example:
+        >>> schema = Schema({'name': 'user.fullName', 'age': 'user.years'})
+        >>> data = {'user': {'fullName': 'Alice', 'years': 30}}
+        >>> transform_data(data, schema, TransformOptions(strict=True))
+        {'name': 'Alice', 'age': 30}
+    """
+```
+
+### ❌ Inconsistent Documentation Style
+
+**Problem:** Mixing JSDoc, docstring, and plain comments in same project
+
+**Solution:** Choose one style and use consistently:
+- Python → docstrings (Google/NumPy style)
+- TypeScript/JavaScript → JSDoc
+- Java → Javadoc
+- Go → godoc comments
+
+## Related Skills
+
+- **changelog-tracker**: Documents user-facing changes from code modifications
+- **markdown-formatter**: Formats documentation in markdown files
+- **api-doc-generator**: Creates comprehensive API documentation
+- **test-doc-generator**: Generates documentation from test cases
 
 Follow the standards defined in `DOCUMENTATION_STANDARDS.md`.

@@ -4,11 +4,6 @@
       "command": "python",
       "args": ["../../mcp-servers/docs-index/server.py"],
       "description": "Curated documentation index for backend development"
-    },
-    "fetch": {
-      "command": "uvx",
-      "args": ["mcp-server-fetch"],
-      "description": "Web fetching for documentation URLs from docs-index"
     }
   }
 }

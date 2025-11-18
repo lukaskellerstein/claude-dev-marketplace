@@ -40,6 +40,11 @@
     "./agents/nodejs-specialist.md",
     "./agents/python-specialist.md"
   ],
-  "skills": "./skills/",
+  "skills": [
+    "./skills/api-best-practices",
+    "./skills/auth-patterns",
+    "./skills/error-handling",
+    "./skills/validation-rules"
+  ],
   "mcpServers": "./.mcp.json"
 }

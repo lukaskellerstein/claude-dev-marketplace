@@ -34,6 +34,11 @@
     "./agents/monolith-specialist.md",
     "./agents/patterns-expert.md"
   ],
-  "skills": "./skills/",
+  "skills": [
+    "./skills/anti-patterns",
+    "./skills/coupling-analysis",
+    "./skills/scalability-check",
+    "./skills/service-boundaries"
+  ],
   "mcpServers": "./.mcp.json"
 }

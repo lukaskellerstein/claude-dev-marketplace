@@ -44,6 +44,11 @@
     "./agents/optimization-expert.md",
     "./agents/training-specialist.md"
   ],
-  "skills": "./skills/",
+  "skills": [
+    "./skills/gpu-optimization",
+    "./skills/hyperparameter-tuning",
+    "./skills/memory-management",
+    "./skills/model-selection"
+  ],
   "mcpServers": "./.mcp.json"
 }

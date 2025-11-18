@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Comprehensive frontend development toolkit for React, TypeScript, and modern styling with Tailwind CSS, shadcn-ui, and Radix UI",
   "author": {
-    "name": "Lukas Kellnerstein",
+    "name": "Lukas Kellerstein",
     "email": "lukas@example.com",
     "url": "https://github.com/lukaskellerstein"
   },
@@ -24,13 +24,25 @@
     "design-system",
     "ui-components"
   ],
-  "commands": "./commands/",
+  "commands": [
+    "./commands/add-ui.md",
+    "./commands/architect.md",
+    "./commands/audit.md",
+    "./commands/component.md",
+    "./commands/hook.md",
+    "./commands/style.md",
+    "./commands/test.md"
+  ],
   "agents": [
     "./agents/architecture-planner.md",
     "./agents/performance-auditor.md",
     "./agents/react-generator.md",
     "./agents/style-master.md"
   ],
-  "skills": "./skills/",
+  "skills": [
+    "./skills/performance-monitor",
+    "./skills/react-guardian",
+    "./skills/style-assistant"
+  ],
   "mcpServers": "./.mcp.json"
 }

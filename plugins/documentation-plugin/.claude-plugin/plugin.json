@@ -30,7 +30,18 @@
     "c4-model",
     "uml"
   ],
-  "commands": "./commands/",
+  "commands": [
+    "./commands/adr.md",
+    "./commands/api-docs.md",
+    "./commands/arch-doc.md",
+    "./commands/changelog.md",
+    "./commands/contributing.md",
+    "./commands/convert-doc.md",
+    "./commands/doc-health.md",
+    "./commands/docs-all.md",
+    "./commands/readme.md",
+    "./commands/validate-docs.md"
+  ],
   "agents": [
     "./agents/adr-generator.md",
     "./agents/api-documenter.md",
@@ -39,6 +50,11 @@
     "./agents/doc-health-analyzer.md",
     "./agents/doc-validator.md",
     "./agents/readme-generator.md"
+  ],
+  "skills": [
+    "./skills/changelog-tracker",
+    "./skills/inline-doc-generator",
+    "./skills/markdown-formatter"
   ],
   "mcpServers": "./.mcp.json"
 }

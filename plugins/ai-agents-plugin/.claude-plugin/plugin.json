@@ -35,8 +35,19 @@
     "./commands/deploy.md",
     "./commands/test.md"
   ],
-  "agents": "./agents/",
-  "skills": "./skills/",
+  "agents": [
+    "./agents/claude-architect.md",
+    "./agents/langchain-builder.md",
+    "./agents/langgraph-designer.md",
+    "./agents/memory-specialist.md",
+    "./agents/microsoft-orchestrator.md"
+  ],
+  "skills": [
+    "./skills/agent-monitoring",
+    "./skills/error-recovery",
+    "./skills/performance-tuning",
+    "./skills/security-validation"
+  ],
   "hooks": "./hooks/hooks.json",
   "mcpServers": "./.mcp.json"
 }

@@ -20,7 +20,16 @@
     "devops",
     "cloud"
   ],
-  "commands": ["./commands/*.md"],
+  "commands": [
+    "./commands/docker.md",
+    "./commands/docker-compose.md",
+    "./commands/gcp-iam.md",
+    "./commands/gcp-setup.md",
+    "./commands/helm-chart.md",
+    "./commands/infra-audit.md",
+    "./commands/k8s-deploy.md",
+    "./commands/terraform.md"
+  ],
   "agents": [
     "./agents/docker-expert.md",
     "./agents/gcp-expert.md",
@@ -29,6 +38,12 @@
     "./agents/k8s-expert.md",
     "./agents/terraform-expert.md"
   ],
-  "skills": "./skills/",
+  "skills": [
+    "./skills/docker-security",
+    "./skills/gcp-cost-guard",
+    "./skills/helm-validator",
+    "./skills/iac-compliance",
+    "./skills/k8s-optimizer"
+  ],
   "mcpServers": "./.mcp.json"
 }

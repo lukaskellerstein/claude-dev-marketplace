@@ -1,6 +1,5 @@
 ---
 description: Test and validate AI agents
-allowed-tools: Bash, Read, Write
 ---
 
 # Test Command

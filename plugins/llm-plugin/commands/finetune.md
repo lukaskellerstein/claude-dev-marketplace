@@ -1,6 +1,5 @@
 ---
 description: Fine-tune models with advanced techniques
-allowed-tools: Bash, Read, Write, Task
 ---
 
 # Finetune Command

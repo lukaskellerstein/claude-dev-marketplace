@@ -1,6 +1,5 @@
 ---
 description: Generate Kubernetes resources with best practices
-allowed-tools: Write, Read, Grep
 ---
 
 # Deploy to Kubernetes

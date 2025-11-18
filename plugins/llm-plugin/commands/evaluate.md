@@ -1,6 +1,5 @@
 ---
 description: Evaluate model performance and benchmarks
-allowed-tools: Read, Task
 ---
 
 # Evaluate Command

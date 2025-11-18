@@ -1,6 +1,5 @@
 ---
 description: Generate docker-compose.yml for local development
-allowed-tools: Write, Read, Edit
 ---
 
 # Generate Docker Compose Configuration

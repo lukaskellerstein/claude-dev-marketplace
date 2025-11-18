@@ -1,6 +1,5 @@
 ---
 description: Initialize GCP project with best practices and required services
-allowed-tools: Bash, Write, Read, Edit
 ---
 
 # GCP Project Setup

@@ -1,6 +1,5 @@
 ---
 description: Create stateful workflows with LangGraph 1.0
-allowed-tools: Bash, Read, Write
 ---
 
 # Workflow Command (LangGraph 1.0)

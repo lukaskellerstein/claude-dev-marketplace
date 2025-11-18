@@ -1,6 +1,5 @@
 ---
 description: Train or fine-tune language models
-allowed-tools: Bash, Read, Write, Task
 ---
 
 # Train Command

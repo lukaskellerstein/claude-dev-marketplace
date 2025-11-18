@@ -1,6 +1,5 @@
 ---
 description: Manage component styles - add, convert, or optimize
-allowed-tools: Read, Write, Grep, Glob, Task
 ---
 
 # Style Management

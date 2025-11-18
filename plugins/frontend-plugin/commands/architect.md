@@ -1,6 +1,5 @@
 ---
 description: Design complete frontend architecture
-allowed-tools: Read, Write, Grep, Glob, Task
 ---
 
 # Frontend Architecture Design

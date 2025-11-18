@@ -1,6 +1,5 @@
 ---
 description: Create agents with Microsoft Agent Framework
-allowed-tools: Bash, Read, Write
 ---
 
 # Microsoft Agent Command

@@ -1,6 +1,5 @@
 ---
 description: Create Helm chart with production-ready structure
-allowed-tools: Write, Read, Edit
 ---
 
 # Create Helm Chart

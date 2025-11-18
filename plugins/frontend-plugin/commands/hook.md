@@ -1,6 +1,5 @@
 ---
 description: Generate custom React hook
-allowed-tools: Read, Write, Grep, Task
 ---
 
 # Generate Custom React Hook

@@ -1,6 +1,5 @@
 ---
 description: Quantize models for efficient deployment
-allowed-tools: Read, Write, Task
 ---
 
 # Quantize Command

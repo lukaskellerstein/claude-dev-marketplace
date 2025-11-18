@@ -1,6 +1,5 @@
 ---
 description: Manage GCP IAM policies and service accounts
-allowed-tools: Write, Read, Bash
 ---
 
 # GCP IAM Management

@@ -1,6 +1,5 @@
 ---
 description: Manage and prepare datasets for training
-allowed-tools: Read, Write, Task
 ---
 
 # Dataset Command

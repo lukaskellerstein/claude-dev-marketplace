@@ -1,6 +1,5 @@
 ---
 description: Deploy and serve models for inference
-allowed-tools: Bash, Task
 ---
 
 # Serve Command

@@ -1,66 +1,19 @@
 {
   "mcpServers": {
-    "filesystem": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "./agents",
-        "./workflows",
-        "./microsoft-agents"
-      ],
-      "description": "Access agent code files and workflows"
-    },
-    "database": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-sqlite",
-        "./checkpoints.db",
-        "./memory.db"
-      ],
-      "description": "Access agent checkpoints and memory storage"
+    "docs-index": {
+      "command": "python",
+      "args": ["../../mcp-servers/docs-index/server.py"],
+      "description": "Curated documentation index for AI agent frameworks (LangChain, LangGraph, Microsoft Agent Framework)"
     },
     "github": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-github"
-      ],
-      "env": {
-        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
-      },
-      "description": "Manage agent code repositories on GitHub"
+      "args": ["-y", "@github/mcp-server"],
+      "description": "GitHub integration for agent code repositories and version control"
     },
-    "web": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-brave-search"
-      ],
-      "env": {
-        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
-      },
-      "description": "Web search tool for agents"
-    },
-    "memory": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-memory"
-      ],
-      "description": "Persistent memory for agents"
-    },
-    "langsmith": {
-      "command": "python3",
-      "args": [
-        "-m",
-        "langsmith_mcp_server"
-      ],
-      "env": {
-        "LANGSMITH_API_KEY": "${LANGSMITH_API_KEY}"
-      },
-      "description": "LangSmith observability and monitoring"
+    "mermaid-mcp": {
+      "url": "https://mcp.mermaidchart.com/mcp",
+      "type": "http",
+      "description": "Mermaid diagram generation for agent workflow visualizations"
     }
   }
 }

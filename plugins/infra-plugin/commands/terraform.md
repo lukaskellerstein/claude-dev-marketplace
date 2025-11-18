@@ -1,6 +1,5 @@
 ---
 description: Generate Terraform modules for cloud providers
-allowed-tools: Write, Read, Edit, Grep
 ---
 
 # Generate Terraform Module

@@ -1,6 +1,5 @@
 ---
 description: Deploy AI agents to production
-allowed-tools: Bash, Read, Write
 ---
 
 # Deploy Command

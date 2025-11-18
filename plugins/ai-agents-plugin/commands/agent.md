@@ -1,6 +1,5 @@
 ---
 description: Create and manage AI agents using LangChain 1.0
-allowed-tools: Bash, Read, Write
 ---
 
 # Agent Command (LangChain 1.0)

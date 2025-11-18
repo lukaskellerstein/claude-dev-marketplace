@@ -1,6 +1,5 @@
 ---
 description: Comprehensive performance and quality audit
-allowed-tools: Read, Grep, Glob, Task
 ---
 
 # Performance & Quality Audit

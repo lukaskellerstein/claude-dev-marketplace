@@ -1,6 +1,5 @@
 ---
 description: Audit infrastructure configuration for security, cost, and compliance
-allowed-tools: Read, Grep, Glob
 ---
 
 # Infrastructure Audit

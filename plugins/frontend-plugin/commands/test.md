@@ -1,6 +1,5 @@
 ---
 description: Testing utilities for components
-allowed-tools: Read, Write, Bash, Task
 ---
 
 # Testing Utilities

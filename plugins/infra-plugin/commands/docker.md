@@ -1,6 +1,5 @@
 ---
 description: Generate optimized Dockerfile for specific app type
-allowed-tools: Write, Read, Edit
 ---
 
 # Generate Dockerfile

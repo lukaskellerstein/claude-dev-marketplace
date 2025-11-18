@@ -1,6 +1,5 @@
 ---
 description: Add UI library components
-allowed-tools: Bash, Read, Write, Task
 ---
 
 # Add UI Library Components

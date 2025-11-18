@@ -1,6 +1,6 @@
 {
   "name": "aiagent-plugin",
-  "version": "2.0.0",
+  "version": "1.0.0",
   "description": "AI agent orchestration for Claude, LangChain 1.0, LangGraph 1.0, Microsoft Agent Framework",
   "author": {
     "name": "Claude Code Team",

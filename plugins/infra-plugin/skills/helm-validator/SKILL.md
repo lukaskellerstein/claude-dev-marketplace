@@ -1,6 +1,6 @@
 ---
 name: helm-validator
-description: Master Helm chart best practices. Use when creating Helm charts, editing Chart.yaml/values.yaml, modifying templates, working with dependencies, or ensuring production readiness.
+description: Master Helm chart best practices and validation. Use when creating Helm charts, editing Chart.yaml/values.yaml, modifying templates, working with dependencies, ensuring production readiness, or when discussing Helm chart structure, template best practices, values schema, chart dependencies, helm hooks, chart testing, release management, or package versioning.
 allowed-tools: Read, Edit
 ---
 

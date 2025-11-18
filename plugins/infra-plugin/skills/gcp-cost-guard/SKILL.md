@@ -1,6 +1,6 @@
 ---
 name: gcp-cost-guard
-description: Master GCP cost optimization. Use when creating/modifying GCP Terraform, designing GKE clusters, setting up compute instances, configuring storage, planning databases, or implementing cost controls.
+description: Master GCP cost optimization and cloud spending reduction. Use when creating/modifying GCP Terraform, designing GKE clusters, setting up compute instances, configuring storage, planning databases, implementing cost controls, or when discussing GCP costs, cloud billing, budget optimization, reducing expenses, preemptible VMs, committed use discounts, sustained use discounts, rightsizing recommendations, or analyzing cloud spending.
 allowed-tools: Read, Edit, Grep
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: iac-compliance
-description: Master IaC compliance (CIS, PCI DSS, HIPAA, SOC2, GDPR). Use when writing Terraform/CloudFormation, defining security policies, implementing compliance controls, auditing infrastructure, or ensuring regulatory adherence.
+description: Master Infrastructure as Code compliance with security frameworks (CIS Benchmarks, PCI DSS, HIPAA, SOC2, GDPR). Use when writing Terraform/CloudFormation, defining security policies, implementing compliance controls, auditing infrastructure, ensuring regulatory adherence, or when discussing compliance requirements, security standards, regulatory frameworks, infrastructure security, encryption at rest, encryption in transit, access controls, audit logging, or compliance validation.
 allowed-tools: Read, Grep
 ---
 

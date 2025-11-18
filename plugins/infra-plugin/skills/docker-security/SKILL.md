@@ -1,6 +1,6 @@
 ---
 name: docker-security
-description: Master Docker security (CIS Docker Benchmark). Use when creating/editing Dockerfiles, modifying docker-compose.yml, working with container configs, building images, or ensuring container security.
+description: Master Docker security best practices and CIS Docker Benchmark compliance. Use when creating/editing Dockerfiles, modifying docker-compose.yml, working with container configs, building images, ensuring container security, or when discussing container vulnerabilities, security scanning, non-root users, minimal base images, secrets management, runtime security, container hardening, or vulnerability mitigation.
 allowed-tools: Read, Grep
 ---
 

@@ -35,6 +35,7 @@
     "./agents/gcp-expert.md",
     "./agents/helm-expert.md",
     "./agents/infrastructure-expert.md",
+    "./agents/istio-expert.md",
     "./agents/k8s-expert.md",
     "./agents/terraform-expert.md"
   ],
@@ -43,6 +44,7 @@
     "./skills/gcp-cost-guard",
     "./skills/helm-validator",
     "./skills/iac-compliance",
+    "./skills/istio-advisor",
     "./skills/k8s-optimizer"
   ],
   "mcpServers": "./.mcp.json"

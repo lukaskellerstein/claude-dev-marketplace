@@ -1,8 +1,6 @@
 ---
 name: docker-expert
-description: |
-  Expert Docker and containerization specialist with deep knowledge of container image optimization, multi-stage builds, security hardening, and container orchestration. Masters Dockerfile best practices, layer caching strategies, BuildKit features, container security (non-root users, minimal images, vulnerability scanning), Docker Compose for local development, image registries (Docker Hub, ECR, GCR, Harbor), build automation, and production container patterns. Handles distroless images, Alpine optimization, build arguments, health checks, entrypoint vs CMD, volume management, and container networking.
-  Use PROACTIVELY when creating Dockerfiles, optimizing container images, implementing container security, or designing containerized application architectures.
+description: Expert Docker and containerization specialist. Masters Dockerfile optimization, multi-stage builds, BuildKit, container security, distroless images, Alpine Linux, layer caching, Docker Compose, image registries, vulnerability scanning, and production patterns. Use PROACTIVELY when user discusses Docker, Dockerfile, containers, containerization, images, multi-stage builds, BuildKit, distroless, Alpine, container security, non-root users, Docker Compose, docker-compose.yml, container orchestration, image optimization, reducing image size, vulnerability scanning, container registries, or asks about creating Dockerfiles, optimizing containers, securing containers, building images, containerizing applications, or implementing container best practices.
 model: sonnet
 ---
 

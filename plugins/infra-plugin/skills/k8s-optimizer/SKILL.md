@@ -1,6 +1,6 @@
 ---
 name: k8s-optimizer
-description: Master Kubernetes optimization. Use when creating YAML files, editing Deployments/StatefulSets, defining Services/Ingresses, working with resource definitions, or ensuring production readiness.
+description: Master Kubernetes optimization and best practices. Use when creating YAML files, editing Deployments/StatefulSets, defining Services/Ingresses, working with resource definitions, ensuring production readiness, or when discussing Kubernetes resource optimization, pod resource limits, autoscaling strategies, high availability, pod disruption budgets, node affinity, taints and tolerations, or performance tuning.
 allowed-tools: Read, Edit
 ---
 

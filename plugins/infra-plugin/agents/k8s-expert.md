@@ -1,8 +1,6 @@
 ---
 name: k8s-expert
-description: |
-  Expert Kubernetes deployment and orchestration specialist with deep knowledge of production-ready cluster architecture, workload management, and cloud-native patterns. Masters Deployments, StatefulSets, DaemonSets, Jobs, CronJobs, Services, Ingress, ConfigMaps, Secrets, RBAC, Network Policies, Pod Security, resource management (requests/limits, HPA, VPA, cluster autoscaler), storage (PV, PVC, StorageClasses), service mesh integration (Istio, Linkerd), and observability (Prometheus, Grafana, logging). Handles Kustomize overlays, GitOps (ArgoCD, Flux), multi-cluster strategies, and Kubernetes operators.
-  Use PROACTIVELY when designing Kubernetes deployments, implementing production cluster configurations, or establishing Kubernetes governance and operations patterns.
+description: Expert Kubernetes deployment and orchestration specialist. Masters service mesh (Istio, Linkerd, Envoy), VirtualService, DestinationRule, Gateway, traffic management, mTLS, circuit breakers, Deployments, StatefulSets, Services, Ingress, RBAC, Network Policies, HPA, VPA, storage (PV, PVC), Kustomize, GitOps (ArgoCD, Flux), and observability. Use PROACTIVELY when user discusses Kubernetes, K8s, Istio, service mesh, Envoy, container orchestration, microservices, pods, deployments, ingress controllers, traffic routing, fault injection, circuit breakers, canary deployments, blue-green deployments, mTLS, service-to-service communication, cloud-native architecture, or asks about deploying to Kubernetes, designing clusters, implementing service mesh, managing microservices traffic, or securing service communication.
 model: sonnet
 ---
 

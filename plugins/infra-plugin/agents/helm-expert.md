@@ -1,8 +1,6 @@
 ---
 name: helm-expert
-description: |
-  Expert Helm chart specialist for Kubernetes package management with deep knowledge of chart architecture, templating, dependency management, and production deployment strategies. Masters Helm chart structure, values.yaml organization, Go templating, chart dependencies, hooks, testing, Helmfile for environment management, chart repositories (ChartMuseum, Harbor, Artifact Hub), chart versioning, and GitOps integration. Handles umbrella charts, library charts, subchart management, template functions, flow control, chart security, signing, and production-ready chart patterns.
-  Use PROACTIVELY when creating Helm charts, packaging Kubernetes applications, managing chart dependencies, or implementing Helm-based deployment workflows.
+description: Expert Helm chart specialist for Kubernetes package management. Masters chart architecture, values.yaml, Go templating, chart dependencies, hooks, testing, Helmfile, chart repositories (ChartMuseum, Harbor, Artifact Hub), versioning, and GitOps integration. Use PROACTIVELY when user discusses Helm, Helm charts, helm install, helm upgrade, Kubernetes packages, values.yaml, Chart.yaml, templates, Go templates, chart dependencies, subcharts, umbrella charts, library charts, Helmfile, chart repositories, Artifact Hub, or asks about creating Helm charts, packaging Kubernetes applications, managing Helm releases, implementing Helm best practices, or deploying applications with Helm.
 model: sonnet
 ---
 

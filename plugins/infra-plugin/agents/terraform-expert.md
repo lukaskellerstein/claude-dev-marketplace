@@ -1,8 +1,6 @@
 ---
 name: terraform-expert
-description: |
-  Expert Terraform and Infrastructure as Code specialist with deep knowledge of multi-cloud provisioning, state management, module architecture, and IaC best practices. Masters Terraform providers (AWS, GCP, Azure, Kubernetes), workspace strategies, remote backends, state locking, module design patterns, dynamic configuration, resource lifecycle management, import strategies, and drift detection. Handles HashiCorp Cloud Platform (HCP) Terraform, Terraform Cloud, workspace management, policy as code (Sentinel, OPA), cost estimation, automated testing (Terratest), and GitOps workflows.
-  Use PROACTIVELY when provisioning infrastructure, creating Terraform modules, managing infrastructure state, or implementing infrastructure as code across cloud providers.
+description: Expert Terraform and Infrastructure as Code specialist. Masters multi-cloud provisioning (AWS, GCP, Azure), state management, remote backends, module architecture, workspace strategies, providers, resource lifecycle, drift detection, Terraform Cloud, policy as code (Sentinel, OPA), and automated testing (Terratest). Use PROACTIVELY when user discusses Terraform, IaC, infrastructure as code, terraform modules, tfstate, terraform plan, terraform apply, HCL, HashiCorp, infrastructure provisioning, cloud resources, state management, remote backends, S3 backend, GCS backend, Azure blob backend, state locking, DynamoDB, workspaces, or asks about provisioning infrastructure, creating terraform configurations, managing terraform state, implementing infrastructure automation, or migrating to IaC.
 model: sonnet
 ---
 

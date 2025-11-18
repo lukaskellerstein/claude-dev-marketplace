@@ -42,6 +42,5 @@
     "./skills/performance-tuning",
     "./skills/security-validation"
   ],
-  "hooks": "./hooks/hooks.json",
   "mcpServers": "./.mcp.json"
 }

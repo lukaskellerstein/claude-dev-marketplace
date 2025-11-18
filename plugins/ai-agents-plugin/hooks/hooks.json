@@ -2,9 +2,8 @@
   "hooks": {
     "SessionStart": [
       {
-        "enabled": true,
-        "description": "Check Python and AI agent framework versions",
-        "actions": [
+        "matcher": "*",
+        "hooks": [
           {
             "type": "command",
             "command": "echo 'AI Agent Plugin 2.0 - LangChain 1.0, LangGraph 1.0, Microsoft Agent Framework'"

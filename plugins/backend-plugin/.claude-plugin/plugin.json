@@ -1,12 +1,12 @@
 {
   "name": "backend-plugin",
   "version": "1.0.0",
-  "description": "Comprehensive backend development toolkit for REST, GraphQL, gRPC, WebSocket, and message brokers across Node.js, Go, and Python",
+  "description": "Backend development toolkit for REST, GraphQL, gRPC, WebSocket, and message broker integrations",
   "author": {
-    "name": "Claude Code Team",
-    "email": "team@claude.code",
-    "url": "https://github.com/claude-code/backend-toolkit"
+    "name": "Lukas Kellerstein",
+    "email": "lukas@example.com"
   },
+  "license": "MIT",
   "keywords": [
     "backend",
     "api",
@@ -14,37 +14,13 @@
     "graphql",
     "grpc",
     "websocket",
-    "nodejs",
-    "golang",
-    "python",
-    "fastapi",
-    "express",
-    "gin",
+    "message-broker",
     "nats",
     "rabbitmq",
+    "kafka",
     "redis",
-    "kafka"
-  ],
-  "commands": [
-    "./commands/api.md",
-    "./commands/server.md",
-    "./commands/broker.md",
-    "./commands/test-api.md"
-  ],
-  "agents": [
-    "./agents/api-architect.md",
-    "./agents/broker-specialist.md",
-    "./agents/golang-specialist.md",
-    "./agents/graphql-expert.md",
-    "./agents/grpc-expert.md",
-    "./agents/nodejs-specialist.md",
-    "./agents/python-specialist.md"
-  ],
-  "skills": [
-    "./skills/api-best-practices",
-    "./skills/auth-patterns",
-    "./skills/error-handling",
-    "./skills/validation-rules"
-  ],
-  "mcpServers": "./.mcp.json"
+    "pubsub",
+    "microservices",
+    "integration"
+  ]
 }

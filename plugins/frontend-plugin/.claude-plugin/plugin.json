@@ -1,48 +1,31 @@
 {
   "name": "frontend-plugin",
   "version": "1.0.0",
-  "description": "Comprehensive frontend development toolkit for React, TypeScript, and modern styling with Tailwind CSS, shadcn-ui, and Radix UI",
+  "description": "Comprehensive frontend development toolkit for React, TypeScript, Tailwind CSS, shadcn-ui, and responsive design",
   "author": {
     "name": "Lukas Kellerstein",
-    "email": "lukas@example.com",
-    "url": "https://github.com/lukaskellerstein"
+    "email": "lukas@example.com"
   },
-  "homepage": "https://github.com/lukaskellerstein/frontend-toolkit",
-  "repository": "https://github.com/lukaskellerstein/frontend-toolkit",
   "license": "MIT",
   "keywords": [
+    "frontend",
     "react",
     "typescript",
+    "javascript",
     "tailwind",
-    "shadcn",
-    "radix",
-    "frontend",
     "css",
     "scss",
-    "responsive",
+    "shadcn-ui",
+    "radix-ui",
+    "responsive-design",
+    "ui-components",
     "accessibility",
-    "design-system",
-    "ui-components"
+    "performance"
   ],
-  "commands": [
-    "./commands/add-ui.md",
-    "./commands/architect.md",
-    "./commands/audit.md",
-    "./commands/component.md",
-    "./commands/hook.md",
-    "./commands/style.md",
-    "./commands/test.md"
-  ],
-  "agents": [
-    "./agents/architecture-planner.md",
-    "./agents/performance-auditor.md",
-    "./agents/react-generator.md",
-    "./agents/style-master.md"
-  ],
-  "skills": [
-    "./skills/performance-monitor",
-    "./skills/react-guardian",
-    "./skills/style-assistant"
-  ],
-  "mcpServers": "./.mcp.json"
+  "mcpServers": {
+    "shadcn": {
+      "command": "npx",
+      "args": ["shadcn@latest", "mcp"]
+    }
+  }
 }

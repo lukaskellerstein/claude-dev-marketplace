@@ -1,0 +1,30 @@
+{
+  "name": "performance-plugin",
+  "version": "1.0.0",
+  "description": "Comprehensive performance toolkit for monitoring, profiling, and optimization of frontend, backend, and infrastructure",
+  "author": {
+    "name": "Lukas Kellerstein",
+    "email": "lukas@example.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "performance",
+    "optimization",
+    "profiling",
+    "monitoring",
+    "react",
+    "bundle-size",
+    "rendering",
+    "api-performance",
+    "database-queries",
+    "memory-profiling",
+    "cpu-profiling",
+    "load-testing",
+    "lighthouse",
+    "web-vitals",
+    "n+1-queries",
+    "caching",
+    "lazy-loading",
+    "code-splitting"
+  ]
+}

@@ -1,54 +1,36 @@
 {
   "name": "infra-plugin",
   "version": "1.0.0",
-  "description": "Comprehensive infrastructure toolkit for GCP, K8s, Docker, Terraform, and Helm",
+  "description": "Infrastructure toolkit for Google Cloud, Kubernetes, Docker, Terraform, and Helm deployments",
   "author": {
-    "name": "Infrastructure Team",
-    "email": "infra@example.com",
-    "url": "https://github.com/infra-toolkit"
+    "name": "Lukas Kellerstein",
+    "email": "lukas@example.com"
   },
-  "homepage": "https://github.com/infra-toolkit/docs",
-  "repository": "https://github.com/infra-toolkit/plugin",
   "license": "MIT",
   "keywords": [
-    "gcp",
+    "infrastructure",
     "kubernetes",
+    "k8s",
     "docker",
     "terraform",
     "helm",
-    "infrastructure",
+    "gcp",
+    "google-cloud",
+    "containers",
+    "orchestration",
+    "iac",
     "devops",
-    "cloud"
+    "cloud",
+    "deployment"
   ],
-  "commands": [
-    "./commands/docker.md",
-    "./commands/docker-compose.md",
-    "./commands/gcp-iam.md",
-    "./commands/gcp-setup.md",
-    "./commands/helm-chart.md",
-    "./commands/infra-audit.md",
-    "./commands/k8s-deploy.md",
-    "./commands/terraform.md"
-  ],
-  "agents": [
-    "./agents/docker-expert.md",
-    "./agents/gcp-expert.md",
-    "./agents/helm-expert.md",
-    "./agents/infrastructure-expert.md",
-    "./agents/istio-expert.md",
-    "./agents/k8s-expert.md",
-    "./agents/oauth2-keycloak-expert.md",
-    "./agents/terraform-expert.md"
-  ],
-  "skills": [
-    "./skills/docker-security",
-    "./skills/gcp-cost-guard",
-    "./skills/helm-validator",
-    "./skills/iac-compliance",
-    "./skills/istio-advisor",
-    "./skills/k8s-optimizer",
-    "./skills/keycloak-config",
-    "./skills/oauth2-proxy-config"
-  ],
-  "mcpServers": "./.mcp.json"
+  "mcpServers": {
+    "gcloud": {
+      "command": "npx",
+      "args": ["-y", "@google-cloud/gcloud-mcp"]
+    },
+    "terraform": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "hashicorp/terraform-mcp-server:0.2.3"]
+    }
+  }
 }

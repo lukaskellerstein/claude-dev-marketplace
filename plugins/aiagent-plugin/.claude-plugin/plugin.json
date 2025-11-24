@@ -1,0 +1,29 @@
+{
+  "name": "aiagent-plugin",
+  "version": "1.0.0",
+  "description": "Comprehensive toolkit for AI agent development and orchestration with Claude Agent SDK, Langchain, LangGraph, Microsoft Agent Framework, and Temporal.io workflows",
+  "author": {
+    "name": "Lukas Kellerstein",
+    "email": "lukas@example.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "ai-agents",
+    "claude-agent-sdk",
+    "langchain",
+    "langgraph",
+    "microsoft-agent-framework",
+    "temporal",
+    "workflows",
+    "multi-agent-systems",
+    "agent-orchestration",
+    "autonomous-agents",
+    "tool-calling",
+    "agent-memory",
+    "agent-planning",
+    "rag",
+    "retrieval",
+    "agent-collaboration",
+    "agentic-workflows"
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "name": "database-plugin",
+  "version": "1.0.0",
+  "description": "Comprehensive database toolkit for PostgreSQL, MongoDB, Redis, Elasticsearch, Qdrant, Supabase, and MinIO (S3)",
+  "author": {
+    "name": "Lukas Kellerstein",
+    "email": "lukas@example.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "database",
+    "postgresql",
+    "mongodb",
+    "redis",
+    "elasticsearch",
+    "qdrant",
+    "supabase",
+    "minio",
+    "s3",
+    "sql",
+    "nosql",
+    "vector-db",
+    "object-storage",
+    "schema-design",
+    "indexing",
+    "query-optimization",
+    "data-modeling"
+  ]
+}

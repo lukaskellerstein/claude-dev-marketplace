@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "Architecture design toolkit for microservices, cloud patterns, and system design",
   "author": {
-    "name": "Claude Code Team",
-    "email": "team@claude.code",
-    "url": "https://github.com/claude-code/architecture-plugin"
+    "name": "Lukas Kellerstein",
+    "email": "lukas@example.com"
   },
+  "license": "MIT",
   "keywords": [
     "architecture",
     "microservices",
@@ -14,31 +14,9 @@
     "event-sourcing",
     "cqrs",
     "monolith",
-    "cloud",
-    "patterns",
+    "cloud-patterns",
     "system-design",
-    "saga"
-  ],
-  "commands": [
-    "./commands/architect.md",
-    "./commands/analyze.md",
-    "./commands/migrate.md",
-    "./commands/visualize.md",
-    "./commands/pattern.md"
-  ],
-  "agents": [
-    "./agents/cloud-architect.md",
-    "./agents/ddd-expert.md",
-    "./agents/event-architect.md",
-    "./agents/microservices-architect.md",
-    "./agents/monolith-specialist.md",
-    "./agents/patterns-expert.md"
-  ],
-  "skills": [
-    "./skills/anti-patterns",
-    "./skills/coupling-analysis",
-    "./skills/scalability-check",
-    "./skills/service-boundaries"
-  ],
-  "mcpServers": "./.mcp.json"
+    "saga",
+    "message-broker"
+  ]
 }

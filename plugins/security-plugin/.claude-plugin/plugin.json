@@ -1,0 +1,27 @@
+{
+  "name": "security-plugin",
+  "version": "1.0.0",
+  "description": "Comprehensive security toolkit for vulnerability scanning, OWASP compliance, secrets detection, and secure coding practices",
+  "author": {
+    "name": "Lukas Kellerstein",
+    "email": "lukas@example.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "security",
+    "vulnerability",
+    "owasp",
+    "scanning",
+    "secrets-detection",
+    "code-injection",
+    "authentication",
+    "authorization",
+    "secure-coding",
+    "audit",
+    "compliance",
+    "penetration-testing",
+    "xss",
+    "sql-injection",
+    "csrf"
+  ]
+}

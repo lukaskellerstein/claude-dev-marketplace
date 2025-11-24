@@ -12,7 +12,7 @@
       "version": "1.0.0",
       "description": "Architecture design toolkit for microservices, cloud patterns, and system design",
       "author": {
-        "name": "Claude Code Team"
+        "name": "Lukas Kellerstein"
       },
       "license": "MIT",
       "category": "architecture",
@@ -35,7 +35,7 @@
       "version": "1.0.0",
       "description": "Comprehensive backend development toolkit for REST, GraphQL, gRPC, WebSocket, and message brokers across Node.js, Go, and Python",
       "author": {
-        "name": "Claude Code Team"
+        "name": "Lukas Kellerstein"
       },
       "license": "MIT",
       "category": "backend",
@@ -64,7 +64,7 @@
       "version": "1.0.0",
       "description": "Generate comprehensive documentation including README, CHANGELOG, CONTRIBUTING, architecture docs, ADRs, and API documentation with diagram support, document conversion, validation, and health scoring",
       "author": {
-        "name": "Claude Code Marketplace"
+        "name": "Lukas Kellerstein"
       },
       "license": "MIT",
       "category": "documentation",
@@ -121,7 +121,7 @@
       "version": "1.0.0",
       "description": "Comprehensive infrastructure toolkit for GCP, K8s, Docker, Terraform, and Helm",
       "author": {
-        "name": "Infrastructure Team"
+        "name": "Lukas Kellerstein"
       },
       "license": "MIT",
       "category": "infrastructure",
@@ -140,9 +140,9 @@
     {
       "name": "aiagent-plugin",
       "version": "1.0.0",
-      "description": "AI agent orchestration for Claude, LangChain 1.0, LangGraph 1.0, Microsoft Agent Framework",
+      "description": "AI agent orchestration for Claude Agent SDK, LangChain, LangGraph, Microsoft Agent Framework, and Temporal.io workflows",
       "author": {
-        "name": "Claude Code Team"
+        "name": "Lukas Kellerstein"
       },
       "license": "MIT",
       "category": "ai",
@@ -152,19 +152,21 @@
         "langchain",
         "langgraph",
         "microsoft-agent-framework",
+        "temporal",
         "orchestration",
         "workflow",
         "automation",
-        "multi-agent"
+        "multi-agent",
+        "rag"
       ],
-      "source": "./plugins/ai-agents-plugin"
+      "source": "./plugins/aiagent-plugin"
     },
     {
       "name": "llm-plugin",
       "version": "1.0.0",
-      "description": "Comprehensive LLM toolkit for training, fine-tuning, and deployment",
+      "description": "Comprehensive LLM toolkit for training, fine-tuning, and deployment with PyTorch, HuggingFace, Unsloth, vLLM, and Ollama",
       "author": {
-        "name": "Claude Code Team"
+        "name": "Lukas Kellerstein"
       },
       "license": "MIT",
       "category": "ai",
@@ -178,9 +180,120 @@
         "lora",
         "qlora",
         "rlhf",
-        "dpo"
+        "dpo",
+        "unsloth",
+        "vllm",
+        "ollama"
       ],
       "source": "./plugins/llm-plugin"
+    },
+    {
+      "name": "database-plugin",
+      "version": "1.0.0",
+      "description": "Comprehensive database toolkit for PostgreSQL, Supabase, MongoDB, Redis, Elasticsearch, Qdrant, and MinIO (S3)",
+      "author": {
+        "name": "Lukas Kellerstein"
+      },
+      "license": "MIT",
+      "category": "database",
+      "keywords": [
+        "database",
+        "postgresql",
+        "supabase",
+        "mongodb",
+        "redis",
+        "elasticsearch",
+        "qdrant",
+        "minio",
+        "s3",
+        "sql",
+        "nosql",
+        "vector-database"
+      ],
+      "source": "./plugins/database-plugin"
+    },
+    {
+      "name": "cicd-plugin",
+      "version": "1.0.0",
+      "description": "CI/CD automation toolkit for GitHub Actions, pipelines, automated deployment, and release management",
+      "author": {
+        "name": "Lukas Kellerstein"
+      },
+      "license": "MIT",
+      "category": "devops",
+      "keywords": [
+        "cicd",
+        "github-actions",
+        "deployment",
+        "release-management",
+        "automation",
+        "pipelines",
+        "continuous-integration",
+        "continuous-deployment"
+      ],
+      "source": "./plugins/cicd-plugin"
+    },
+    {
+      "name": "security-plugin",
+      "version": "1.0.0",
+      "description": "Security auditing toolkit for vulnerability scanning, OWASP Top 10, secrets detection, and security fixes",
+      "author": {
+        "name": "Lukas Kellerstein"
+      },
+      "license": "MIT",
+      "category": "security",
+      "keywords": [
+        "security",
+        "owasp",
+        "vulnerability-scanning",
+        "security-audit",
+        "secrets-detection",
+        "secure-coding",
+        "penetration-testing"
+      ],
+      "source": "./plugins/security-plugin"
+    },
+    {
+      "name": "performance-plugin",
+      "version": "1.0.0",
+      "description": "Performance optimization toolkit for monitoring, profiling, and optimization of frontend and backend applications",
+      "author": {
+        "name": "Lukas Kellerstein"
+      },
+      "license": "MIT",
+      "category": "performance",
+      "keywords": [
+        "performance",
+        "optimization",
+        "profiling",
+        "monitoring",
+        "load-testing",
+        "bundle-size",
+        "web-vitals",
+        "database-optimization"
+      ],
+      "source": "./plugins/performance-plugin"
+    },
+    {
+      "name": "test-plugin",
+      "version": "1.0.0",
+      "description": "Testing toolkit for test generation, coverage analysis, and quality assurance across multiple testing frameworks",
+      "author": {
+        "name": "Lukas Kellerstein"
+      },
+      "license": "MIT",
+      "category": "testing",
+      "keywords": [
+        "testing",
+        "test-generation",
+        "coverage",
+        "quality-assurance",
+        "unit-tests",
+        "integration-tests",
+        "e2e-tests",
+        "tdd"
+      ],
+      "source": "./plugins/test-plugin"
     }
   ]
 }

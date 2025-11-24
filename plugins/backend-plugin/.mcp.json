@@ -1,9 +1,0 @@
-{
-  "mcpServers": {
-    "docs-index": {
-      "command": "python",
-      "args": ["../../mcp-servers/docs-index/server.py"],
-      "description": "Curated documentation index for backend development"
-    }
-  }
-}

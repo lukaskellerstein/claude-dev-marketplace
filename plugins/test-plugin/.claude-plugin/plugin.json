@@ -1,0 +1,31 @@
+{
+  "name": "test-plugin",
+  "version": "1.0.0",
+  "description": "Comprehensive testing toolkit for test generation, coverage analysis, test quality assessment, and quality assurance automation",
+  "author": {
+    "name": "Lukas Kellerstein",
+    "email": "lukas@example.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "testing",
+    "unit-tests",
+    "integration-tests",
+    "e2e-tests",
+    "test-coverage",
+    "test-automation",
+    "quality-assurance",
+    "test-generation",
+    "test-quality",
+    "tdd",
+    "bdd",
+    "jest",
+    "vitest",
+    "mocha",
+    "pytest",
+    "junit",
+    "test-driven-development",
+    "mutation-testing",
+    "code-coverage"
+  ]
+}

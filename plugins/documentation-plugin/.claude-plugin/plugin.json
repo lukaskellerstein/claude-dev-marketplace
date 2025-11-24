@@ -1,60 +1,36 @@
 {
   "name": "documentation-plugin",
   "version": "1.0.0",
-  "description": "Generate comprehensive documentation including README, CHANGELOG, CONTRIBUTING, architecture docs, ADRs, and API documentation with diagram support, document conversion, validation, and health scoring",
+  "description": "Comprehensive documentation toolkit for generating, reviewing, and scoring README, CHANGELOG, API docs, architecture diagrams, ADRs, and code documentation",
   "author": {
-    "name": "Claude Code Marketplace",
-    "url": "https://github.com/lukaskellerstein/claude-dev-marketplace"
+    "name": "Lukas Kellerstein",
+    "email": "lukas@example.com"
   },
-  "homepage": "https://github.com/lukaskellerstein/claude-dev-marketplace/tree/main/plugins/documentation-generator",
-  "repository": "https://github.com/lukaskellerstein/claude-dev-marketplace",
   "license": "MIT",
   "keywords": [
     "documentation",
     "readme",
     "changelog",
-    "contributing",
-    "architecture",
     "api-docs",
-    "mermaid",
-    "diagrams",
-    "markdown",
-    "docstrings",
-    "jsdoc",
+    "architecture",
     "adr",
-    "openapi",
-    "validation",
-    "health-score",
-    "doc-conversion",
-    "markitdown",
-    "c4-model",
-    "uml"
+    "technical-writing",
+    "docstrings",
+    "code-comments",
+    "markdown",
+    "diagrams",
+    "mermaid",
+    "quality",
+    "documentation-health"
   ],
-  "commands": [
-    "./commands/adr.md",
-    "./commands/api-docs.md",
-    "./commands/arch-doc.md",
-    "./commands/changelog.md",
-    "./commands/contributing.md",
-    "./commands/convert-doc.md",
-    "./commands/doc-health.md",
-    "./commands/docs-all.md",
-    "./commands/readme.md",
-    "./commands/validate-docs.md"
-  ],
-  "agents": [
-    "./agents/adr-generator.md",
-    "./agents/api-documenter.md",
-    "./agents/architecture-documenter.md",
-    "./agents/contributing-generator.md",
-    "./agents/doc-health-analyzer.md",
-    "./agents/doc-validator.md",
-    "./agents/readme-generator.md"
-  ],
-  "skills": [
-    "./skills/changelog-tracker",
-    "./skills/inline-doc-generator",
-    "./skills/markdown-formatter"
-  ],
-  "mcpServers": "./.mcp.json"
+  "mcpServers": {
+    "mermaid-mcp": {
+      "url": "https://mcp.mermaidchart.com/mcp",
+      "type": "http"
+    },
+    "markitdown": {
+      "command": "docker",
+      "args": ["run", "--rm", "-i", "markitdown-mcp:latest"]
+    }
+  }
 }

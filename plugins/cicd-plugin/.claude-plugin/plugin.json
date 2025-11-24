@@ -1,0 +1,24 @@
+{
+  "name": "cicd-plugin",
+  "version": "1.0.0",
+  "description": "CI/CD toolkit for GitHub Actions, pipelines, automated deployment, and release management",
+  "author": {
+    "name": "Lukas Kellerstein",
+    "email": "lukas@example.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "ci-cd",
+    "github-actions",
+    "pipelines",
+    "deployment",
+    "automation",
+    "release-management",
+    "continuous-integration",
+    "continuous-deployment",
+    "devops",
+    "workflows",
+    "testing",
+    "build"
+  ]
+}

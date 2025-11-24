@@ -1,54 +1,31 @@
 {
   "name": "llm-plugin",
   "version": "1.0.0",
-  "description": "Comprehensive LLM toolkit for training, fine-tuning, and deployment",
+  "description": "Comprehensive toolkit for LLM training, fine-tuning, and deployment with PyTorch, HuggingFace, Unsloth, vLLM, and Ollama",
   "author": {
-    "name": "Claude Code Team",
-    "email": "team@claude.code",
-    "url": "https://github.com/claude-code/llm-toolkit"
+    "name": "Lukas Kellerstein",
+    "email": "lukas@example.com"
   },
-  "homepage": "https://github.com/claude-code/llm-toolkit",
-  "repository": "https://github.com/claude-code/llm-toolkit",
   "license": "MIT",
   "keywords": [
     "llm",
     "pytorch",
     "huggingface",
     "transformers",
+    "training",
+    "fine-tuning",
+    "peft",
+    "lora",
+    "qlora",
+    "trl",
     "unsloth",
     "vllm",
     "ollama",
-    "training",
-    "finetuning",
-    "lora",
-    "qlora",
-    "rlhf",
-    "dpo",
+    "gpt",
     "llama",
-    "mistral",
-    "gpt"
-  ],
-  "commands": [
-    "./commands/train.md",
-    "./commands/finetune.md",
-    "./commands/serve.md",
-    "./commands/evaluate.md",
-    "./commands/quantize.md",
-    "./commands/dataset.md"
-  ],
-  "agents": [
-    "./agents/dataset-curator.md",
-    "./agents/deployment-engineer.md",
-    "./agents/evaluation-analyst.md",
-    "./agents/finetuning-expert.md",
-    "./agents/optimization-expert.md",
-    "./agents/training-specialist.md"
-  ],
-  "skills": [
-    "./skills/gpu-optimization",
-    "./skills/hyperparameter-tuning",
-    "./skills/memory-management",
-    "./skills/model-selection"
-  ],
-  "mcpServers": "./.mcp.json"
+    "model-deployment",
+    "inference",
+    "machine-learning",
+    "deep-learning"
+  ]
 }

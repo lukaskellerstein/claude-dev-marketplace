@@ -24,7 +24,7 @@ Follow these steps:
    - Microsoft Agent Framework for enterprise scenarios
    - Hybrid approach combining multiple frameworks
 
-3. **Launch Agent Orchestration Expert**: Use the `agent-orchestration-expert` agent to:
+3. **Launch Agent Orchestration Expert**: Use the `aiagent-plugin:agent-orchestration-expert` agent to:
    - Design overall system architecture
    - Define agent roles and responsibilities
    - Design coordination patterns
@@ -34,8 +34,8 @@ Follow these steps:
    - Design monitoring and observability
 
 4. **Framework-Specific Design**: Depending on chosen framework, use:
-   - `claude-agent-expert` for Claude Agent SDK implementation
-   - `langchain-expert` for Langchain/LangGraph implementation
+   - `aiagent-plugin:claude-agent-expert` for Claude Agent SDK implementation
+   - `aiagent-plugin:langchain-expert` for Langchain/LangGraph implementation
    - Both if using hybrid approach
 
 5. **Review and Optimize** (if needed): Use appropriate expert to:

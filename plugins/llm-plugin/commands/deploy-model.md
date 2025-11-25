@@ -16,7 +16,7 @@ Follow these steps:
    - Scaling needs
    - Review existing infrastructure if applicable
 
-2. **Launch Deployment Expert**: Use the `llm-deployment-expert` agent to:
+2. **Launch Deployment Expert**: Use the `llm-plugin:llm-deployment-expert` agent to:
    - Select deployment platform (vLLM, Ollama, TGI, custom)
    - Configure inference optimizations
    - Design infrastructure setup
@@ -25,7 +25,7 @@ Follow these steps:
    - Design scaling strategy
    - Plan disaster recovery
 
-3. **Optimize Performance**: Use the `model-optimization-expert` agent to:
+3. **Optimize Performance**: Use the `llm-plugin:model-optimization-expert` agent to:
    - Apply quantization for efficiency
    - Optimize inference speed
    - Reduce memory footprint

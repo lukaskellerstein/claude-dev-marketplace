@@ -16,7 +16,7 @@ Follow these steps:
    - Check for existing infrastructure to import
    - Determine resource sizing and scaling needs
 
-2. **Launch Terraform Expert**: Use the `terraform-expert` agent to:
+2. **Launch Terraform Expert**: Use the `infra-plugin:terraform-expert` agent to:
    - Design Terraform module structure
    - Create reusable, composable modules
    - Set up remote state backend (GCS)
@@ -26,7 +26,7 @@ Follow these steps:
    - Implement security best practices
    - Plan for state management and locking
 
-3. **Launch GCloud Expert**: Use the `gcloud-expert` agent to:
+3. **Launch GCloud Expert**: Use the `infra-plugin:gcloud-expert` agent to:
    - Validate GCP service requirements
    - Review IAM permissions needed
    - Verify network architecture design
@@ -34,7 +34,7 @@ Follow these steps:
    - Optimize for cost and performance
    - Review compliance requirements
 
-4. **Launch Kubernetes Expert** (if provisioning GKE): Use the `kubernetes-expert` agent to:
+4. **Launch Kubernetes Expert** (if provisioning GKE): Use the `infra-plugin:kubernetes-expert` agent to:
    - Design GKE cluster configuration
    - Plan node pool strategies
    - Configure networking (VPC-native, network policies)

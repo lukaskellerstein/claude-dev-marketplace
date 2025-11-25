@@ -24,7 +24,7 @@ Follow these steps:
    - Set up release notes generation
    - Design hotfix procedures
 
-3. **CI/CD Integration**: Use the `github-actions-expert` agent to:
+3. **CI/CD Integration**: Use the `cicd-plugin:github-actions-expert` agent to:
    - Create GitHub Actions release workflow
    - Configure release triggers
    - Set up version bumping automation
@@ -32,7 +32,7 @@ Follow these steps:
    - Add artifact publishing steps
    - Configure GitHub Releases
 
-4. **Deployment Integration** (if applicable): Use the `deployment-architect` agent to:
+4. **Deployment Integration** (if applicable): Use the `cicd-plugin:deployment-architect` agent to:
    - Integrate release with deployment
    - Configure environment promotion
    - Add release validation steps

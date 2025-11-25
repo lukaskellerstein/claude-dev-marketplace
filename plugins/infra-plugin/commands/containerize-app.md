@@ -16,7 +16,7 @@ Follow these steps:
    - Identify data persistence needs
    - Review existing Docker configuration if any
 
-2. **Launch Docker Expert**: Use the `docker-expert` agent to:
+2. **Launch Docker Expert**: Use the `infra-plugin:docker-expert` agent to:
    - Design optimized multi-stage Dockerfiles
    - Select appropriate base images (Alpine, Distroless)
    - Implement security best practices

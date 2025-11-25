@@ -14,9 +14,9 @@ Conduct a comprehensive review of the existing architecture and provide recommen
    - Documentation (README, CLAUDE.md, architecture docs)
 
 2. **Launch Architecture Review**: Use multiple specialized agents in parallel:
-   - `microservices-architect`: Review service boundaries, coupling, and DDD patterns
-   - `cloud-patterns-expert`: Assess scalability, reliability, and cloud best practices
-   - `event-sourcing-expert` (if applicable): Review event-driven patterns and messaging
+   - `architecture-plugin:microservices-architect`: Review service boundaries, coupling, and DDD patterns
+   - `architecture-plugin:cloud-patterns-expert`: Assess scalability, reliability, and cloud best practices
+   - `architecture-plugin:event-sourcing-expert` (if applicable): Review event-driven patterns and messaging
 
 3. **Identify Issues**: For each area, identify:
    - Anti-patterns and code smells

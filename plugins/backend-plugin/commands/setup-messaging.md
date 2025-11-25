@@ -14,7 +14,7 @@ Follow these steps:
    - Assess throughput and latency requirements
    - Review existing infrastructure and codebase
 
-2. **Launch Message Broker Expert**: Use the `message-broker-expert` agent to:
+2. **Launch Message Broker Expert**: Use the `backend-plugin:message-broker-expert` agent to:
    - Select appropriate message broker (NATS, RabbitMQ, Kafka, Redis)
    - Design topic/queue structure and naming
    - Define message schemas and events
@@ -22,7 +22,7 @@ Follow these steps:
    - Plan error handling and retry strategies
    - Design monitoring and observability
 
-3. **Real-time Integration** (if applicable): If WebSocket integration needed, use the `realtime-communication-expert` agent to:
+3. **Real-time Integration** (if applicable): If WebSocket integration needed, use the `backend-plugin:realtime-communication-expert` agent to:
    - Design WebSocket protocol for client communication
    - Integrate message broker with WebSocket gateway
    - Design message routing between broker and WebSocket

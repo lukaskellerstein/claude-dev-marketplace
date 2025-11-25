@@ -4,7 +4,7 @@ A comprehensive marketplace of production-ready Claude Code plugins for modern s
 
 ## 🎯 Overview
 
-This marketplace contains **12 plugins** with **125+ files** and **1.7MB** of expert knowledge, covering the entire software development lifecycle.
+This marketplace contains **12 plugins** with **125 files** and **1.7MB** of expert knowledge, covering the entire software development lifecycle.
 
 ## 📦 Plugins
 
@@ -128,8 +128,6 @@ Automate CI/CD pipelines, deployments, and release management.
 **Skills:**
 - `cicd-best-practices` - GitHub Actions best practices
 - `deployment-patterns` - Deployment strategies
-
-**MCP Integration:** GitHub MCP server
 
 **Coverage:** GitHub Actions, Deployment Strategies, Release Management, IaC
 
@@ -377,7 +375,7 @@ Skills automatically activate when working in their domain:
 | Frontend | frontend-plugin | 3 | 3 | 2 | shadcn |
 | Backend | backend-plugin | 3 | 3 | 2 | - |
 | Database | database-plugin | 3 | 3 | 2 | - |
-| CI/CD | cicd-plugin | 3 | 3 | 2 | github |
+| CI/CD | cicd-plugin | 3 | 3 | 2 | - |
 | Infrastructure | infra-plugin | 4 | 3 | 2 | gcloud, terraform |
 | AI Agents | aiagent-plugin | 4 | 3 | 2 | - |
 | LLM | llm-plugin | 4 | 3 | 2 | - |
@@ -386,7 +384,7 @@ Skills automatically activate when working in their domain:
 | Performance | performance-plugin | 4 | 3 | 3 | - |
 | Testing | test-plugin | 3 | 3 | 2 | - |
 
-**Total:** 41 Agents, 36 Commands, 24 Skills, 5 MCP Integrations
+**Total:** 41 Agents, 36 Commands, 24 Skills, 5 MCP Servers
 
 ## 🏗️ Architecture
 
@@ -435,12 +433,12 @@ Built following official Claude Code plugin patterns and best practices from Ant
 ## 📊 Stats
 
 - **12 Plugins** covering the full development lifecycle
-- **125+ Files** of expert knowledge
+- **125 Files** of expert knowledge
 - **1.7MB** of production-ready content
 - **41 Specialized Agents** with deep domain expertise
 - **36 User Commands** for complex workflows
 - **24 Auto-Invoked Skills** maintaining best practices
-- **5 MCP Server Integrations** for extended capabilities
+- **5 MCP Servers** for extended capabilities
 
 ---
 

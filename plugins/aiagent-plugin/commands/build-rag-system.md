@@ -17,7 +17,7 @@ Follow these steps:
    - Budget constraints
    - Review existing data and infrastructure
 
-2. **Launch Langchain Expert**: Use the `langchain-expert` agent to:
+2. **Launch Langchain Expert**: Use the `aiagent-plugin:langchain-expert` agent to:
    - Design document ingestion pipeline
    - Choose chunking strategy
    - Select embedding model
@@ -27,7 +27,7 @@ Follow these steps:
    - Plan query transformation
    - Design generation approach
 
-3. **Agent Integration** (if needed): Use `claude-agent-expert` or `agent-orchestration-expert` for:
+3. **Agent Integration** (if needed): Use `aiagent-plugin:claude-agent-expert` or `aiagent-plugin:agent-orchestration-expert` for:
    - Complex multi-step retrieval with agents
    - Query decomposition and routing
    - Multi-agent collaboration for research

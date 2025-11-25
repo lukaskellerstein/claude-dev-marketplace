@@ -20,7 +20,7 @@ Follow these steps:
    - Data transformations required
    - Relationships to create/modify
 
-3. **Launch Data Modeling Expert**: Use the `data-modeling-expert` agent to:
+3. **Launch Data Modeling Expert**: Use the `database-plugin:data-modeling-expert` agent to:
    - Design migration strategy
    - Plan zero-downtime approach
    - Create rollback procedures
@@ -30,7 +30,7 @@ Follow these steps:
 4. **Create Migration Implementation**:
 
    **For SQL Databases**:
-   - Use the `sql-database-expert` agent to:
+   - Use the `database-plugin:sql-database-expert` agent to:
      - Write forward migration scripts
      - Write rollback scripts
      - Create index migration strategy
@@ -38,7 +38,7 @@ Follow these steps:
      - Test migration on sample data
 
    **For NoSQL Databases**:
-   - Use the `nosql-database-expert` agent to:
+   - Use the `database-plugin:nosql-database-expert` agent to:
      - Plan schema evolution strategy
      - Write data transformation scripts
      - Handle backward compatibility

@@ -16,7 +16,7 @@ Follow these steps:
    - Identify design patterns used
    - Review existing architecture docs
 
-2. **Launch Architecture Documenter**: Use the `architecture-documenter` agent to:
+2. **Launch Architecture Documenter**: Use the `documentation-plugin:architecture-documenter` agent to:
    - Create system architecture diagrams
    - Generate component diagrams
    - Draw sequence diagrams for key flows

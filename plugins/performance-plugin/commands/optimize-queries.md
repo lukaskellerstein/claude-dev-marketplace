@@ -14,7 +14,7 @@ Follow these steps:
    - Query patterns and conventions
    - Existing indexes and constraints
 
-2. **Launch Backend Profiler**: Use `backend-profiler` agent to:
+2. **Launch Backend Profiler**: Use `performance-plugin:backend-profiler` agent to:
    - Identify slow queries (> 100ms)
    - Detect N+1 query problems
    - Analyze query execution plans (EXPLAIN)

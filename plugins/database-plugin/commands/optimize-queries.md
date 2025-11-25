@@ -22,7 +22,7 @@ Follow these steps:
 3. **Launch Appropriate Expert**:
 
    **For SQL Databases**:
-   - Use the `sql-database-expert` agent to:
+   - Use the `database-plugin:sql-database-expert` agent to:
      - Analyze query execution plans
      - Identify missing indexes
      - Detect N+1 query problems
@@ -30,7 +30,7 @@ Follow these steps:
      - Suggest schema optimizations
 
    **For NoSQL Databases**:
-   - Use the `nosql-database-expert` agent to:
+   - Use the `database-plugin:nosql-database-expert` agent to:
      - Analyze query patterns
      - Review indexing strategy
      - Identify inefficient operations

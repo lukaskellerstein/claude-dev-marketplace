@@ -16,7 +16,7 @@ Follow these steps:
    - Caching layer (Redis, Memcached)
    - Message queues (RabbitMQ, Kafka, NATS)
 
-2. **Frontend Performance Analysis**: Launch `frontend-optimizer` agent to:
+2. **Frontend Performance Analysis**: Launch `performance-plugin:frontend-optimizer` agent to:
    - Analyze React component rendering performance
    - Check bundle size and identify large dependencies
    - Evaluate Core Web Vitals (LCP, FID/INP, CLS)
@@ -26,7 +26,7 @@ Follow these steps:
    - Identify JavaScript execution bottlenecks
    - Check for memory leaks in frontend code
 
-3. **Backend Performance Analysis**: Launch `backend-profiler` agent to:
+3. **Backend Performance Analysis**: Launch `performance-plugin:backend-profiler` agent to:
    - Measure API response times
    - Detect N+1 query problems
    - Analyze database query performance
@@ -36,7 +36,7 @@ Follow these steps:
    - Analyze request/response compression
    - Review rate limiting and throttling
 
-4. **Memory & CPU Analysis**: Launch `memory-cpu-analyst` agent to:
+4. **Memory & CPU Analysis**: Launch `performance-plugin:memory-cpu-analyst` agent to:
    - Profile memory usage and detect leaks
    - Analyze CPU hot paths
    - Review garbage collection behavior
@@ -45,7 +45,7 @@ Follow these steps:
    - Profile heap allocations
    - Check thread pool configuration
 
-5. **Load Testing**: Launch `load-testing-specialist` agent to:
+5. **Load Testing**: Launch `performance-plugin:load-testing-specialist` agent to:
    - Run baseline load tests
    - Identify capacity limits
    - Test auto-scaling behavior

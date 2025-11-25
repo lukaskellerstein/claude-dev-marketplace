@@ -10,21 +10,21 @@ Follow these steps:
 
 1. **Analyze Requirements**: Understand the component purpose, props interface, styling needs, and interaction patterns from the user's request
 
-2. **Design Component Architecture**: Use the `react-expert` agent to:
+2. **Design Component Architecture**: Use the `frontend-plugin:react-expert` agent to:
    - Define component props interface with TypeScript
    - Plan state management approach
    - Design component composition and structure
    - Identify reusable custom hooks
    - Plan accessibility features (ARIA attributes, keyboard navigation)
 
-3. **Implement Styling**: Use the `css-tailwind-expert` agent to:
+3. **Implement Styling**: Use the `frontend-plugin:css-tailwind-expert` agent to:
    - Create responsive styles with Tailwind CSS
    - Integrate shadcn-ui or Radix UI components if applicable
    - Implement component variants
    - Add animations and transitions
    - Ensure dark mode support
 
-4. **Ensure Responsiveness**: Use the `responsive-design-expert` agent to:
+4. **Ensure Responsiveness**: Use the `frontend-plugin:responsive-design-expert` agent to:
    - Verify mobile-first responsive behavior
    - Test across breakpoints
    - Ensure touch-friendly interactions

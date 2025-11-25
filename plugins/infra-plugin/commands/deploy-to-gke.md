@@ -15,7 +15,7 @@ Follow these steps:
    - Check for dependencies (databases, caches, message queues)
    - Review existing infrastructure (GCP project, VPC, GKE cluster)
 
-2. **Launch Kubernetes Expert**: Use the `kubernetes-expert` agent to:
+2. **Launch Kubernetes Expert**: Use the `infra-plugin:kubernetes-expert` agent to:
    - Design Kubernetes manifests (Deployments, Services, Ingress)
    - Configure resource limits and requests
    - Set up health checks and probes
@@ -24,7 +24,7 @@ Follow these steps:
    - Design network policies if needed
    - Set up RBAC and service accounts
 
-3. **Launch GCloud Expert**: Use the `gcloud-expert` agent to:
+3. **Launch GCloud Expert**: Use the `infra-plugin:gcloud-expert` agent to:
    - Verify GCP project and GKE cluster setup
    - Configure Cloud SQL or Cloud Storage if needed
    - Set up IAM and Workload Identity
@@ -32,7 +32,7 @@ Follow these steps:
    - Set up Secret Manager for sensitive data
    - Configure Cloud Monitoring and Logging
 
-4. **Launch Docker Expert** (if needed): Use the `docker-expert` agent to:
+4. **Launch Docker Expert** (if needed): Use the `infra-plugin:docker-expert` agent to:
    - Optimize Dockerfiles for production
    - Set up multi-stage builds
    - Implement security best practices

@@ -16,7 +16,7 @@ Follow these steps:
    - Review license file
    - Identify technology stack
 
-2. **Launch Technical Writer**: Use the `technical-writer` agent to:
+2. **Launch Technical Writer**: Use the `documentation-plugin:technical-writer` agent to:
    - Create project overview and description
    - Write clear installation instructions
    - Document configuration options

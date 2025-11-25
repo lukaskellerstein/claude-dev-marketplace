@@ -16,7 +16,7 @@ Follow these steps:
    - List bug fixes
    - Note security updates
 
-2. **Launch Changelog Maintainer**: Use the `changelog-maintainer` agent to:
+2. **Launch Changelog Maintainer**: Use the `documentation-plugin:changelog-maintainer` agent to:
    - Parse and categorize changes
    - Determine appropriate version bump (major/minor/patch)
    - Format changes according to Keep a Changelog

@@ -14,7 +14,7 @@ Follow these steps:
    - Determine performance and scalability requirements
    - Check for existing API patterns in the codebase
 
-2. **Launch API Designer**: Use the `api-designer` agent to:
+2. **Launch API Designer**: Use the `backend-plugin:api-designer` agent to:
    - Choose appropriate API style (REST, GraphQL, gRPC)
    - Design resource models and type system
    - Define endpoints/operations with clear semantics

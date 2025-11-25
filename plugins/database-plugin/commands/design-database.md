@@ -10,7 +10,7 @@ Follow these steps:
 
 1. **Analyze Requirements**: Understand the domain, data entities, relationships, and access patterns from the user's request and existing codebase
 
-2. **Launch Data Modeling Expert**: Use the `data-modeling-expert` agent to:
+2. **Launch Data Modeling Expert**: Use the `database-plugin:data-modeling-expert` agent to:
    - Create conceptual ER diagram
    - Analyze access patterns
    - Recommend database technology selection
@@ -20,7 +20,7 @@ Follow these steps:
 3. **Database-Specific Design**: Based on recommended database type:
 
    **For SQL Databases (PostgreSQL, Supabase)**:
-   - Use the `sql-database-expert` agent to:
+   - Use the `database-plugin:sql-database-expert` agent to:
      - Design normalized schema with tables, columns, types
      - Define constraints, indexes, and relationships
      - Create migration scripts
@@ -28,7 +28,7 @@ Follow these steps:
      - Optimize query patterns
 
    **For NoSQL Databases (MongoDB, Redis, Elasticsearch, Qdrant)**:
-   - Use the `nosql-database-expert` agent to:
+   - Use the `database-plugin:nosql-database-expert` agent to:
      - Design document/data structures
      - Plan indexing strategy
      - Define query patterns

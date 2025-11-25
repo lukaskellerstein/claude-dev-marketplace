@@ -15,7 +15,7 @@ Follow these steps:
    - Check for monorepo or multi-package setup
    - Identify dependencies and build requirements
 
-2. **Launch GitHub Actions Expert**: Use the `github-actions-expert` agent to:
+2. **Launch GitHub Actions Expert**: Use the `cicd-plugin:github-actions-expert` agent to:
    - Design workflow structure (CI, CD, release workflows)
    - Configure appropriate triggers (push, PR, schedule)
    - Set up test execution with proper reporting
@@ -24,7 +24,7 @@ Follow these steps:
    - Implement security scanning
    - Add monitoring and notifications
 
-3. **Validate with Deployment Architect**: Use the `deployment-architect` agent to:
+3. **Validate with Deployment Architect**: Use the `cicd-plugin:deployment-architect` agent to:
    - Review deployment strategy
    - Validate infrastructure requirements
    - Check health check configuration

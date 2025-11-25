@@ -23,7 +23,7 @@ Follow these steps:
    - Test naming conventions
    - Test organization (describe/context blocks)
 
-3. **Launch Test Quality Expert**: Use the `test-quality-expert` agent to:
+3. **Launch Test Quality Expert**: Use the `test-plugin:test-quality-expert` agent to:
    - Detect test smells and anti-patterns
    - Analyze test structure (AAA pattern adherence)
    - Evaluate test data management

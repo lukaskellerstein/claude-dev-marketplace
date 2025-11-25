@@ -18,7 +18,7 @@ Follow these steps:
    - Contributing guides
    - Any other .md files
 
-2. **Launch Documentation Reviewer**: Use the `documentation-reviewer` agent to:
+2. **Launch Documentation Reviewer**: Use the `documentation-plugin:documentation-reviewer` agent to:
    - Assess coverage (what's documented vs. what should be)
    - Verify accuracy (is information correct and current?)
    - Evaluate clarity (is it easy to understand?)

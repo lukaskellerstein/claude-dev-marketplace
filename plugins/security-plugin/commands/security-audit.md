@@ -15,7 +15,7 @@ Follow these steps:
    - Review authentication and authorization mechanisms
    - Check for existing security documentation
 
-2. **Launch Security Auditor**: Use the `security-auditor` agent to:
+2. **Launch Security Auditor**: Use the `security-plugin:security-auditor` agent to:
    - Perform OWASP Top 10 vulnerability assessment
    - Review authentication and authorization implementation
    - Analyze data handling and encryption
@@ -197,6 +197,6 @@ root cause, related vulnerabilities, and prevention measures
 - Run `/security-audit` first to identify issues
 - Follow with `/scan-vulnerabilities` for dependency analysis
 - Use `/fix-vulnerability` to remediate specific findings
-- Implement fixes with `secure-code-expert` agent
+- Implement fixes with `security-plugin:secure-code-expert` agent
 
 Provide actionable, prioritized security audit reports that enable immediate remediation of critical vulnerabilities.

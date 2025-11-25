@@ -15,7 +15,7 @@ Follow these steps:
    - Check for stateful components (databases, storage)
    - Review security and compliance requirements
 
-2. **Launch Deployment Architect**: Use the `deployment-architect` agent to:
+2. **Launch Deployment Architect**: Use the `cicd-plugin:deployment-architect` agent to:
    - Choose appropriate deployment strategy (rolling, blue-green, canary)
    - Design infrastructure as code (Terraform, Helm, Kustomize)
    - Create Kubernetes manifests or cloud service configurations
@@ -24,7 +24,7 @@ Follow these steps:
    - Design rollback procedures
    - Plan for disaster recovery
 
-3. **CI/CD Integration**: Use the `github-actions-expert` agent to:
+3. **CI/CD Integration**: Use the `cicd-plugin:github-actions-expert` agent to:
    - Create deployment workflow in GitHub Actions
    - Configure deployment triggers
    - Set up environment promotion (dev -> staging -> prod)

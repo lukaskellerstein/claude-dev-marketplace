@@ -15,7 +15,7 @@ Follow these steps:
    - Review component organization
    - Check TypeScript usage and typing quality
 
-2. **Performance Audit**: Use the `react-expert` agent to identify:
+2. **Performance Audit**: Use the `frontend-plugin:react-expert` agent to identify:
    - Unnecessary re-renders
    - Missing memoization opportunities
    - Large bundle sizes
@@ -25,7 +25,7 @@ Follow these steps:
    - Memory leaks (useEffect cleanup)
    - Expensive computations in render
 
-3. **Accessibility Audit**: Use the `responsive-design-expert` agent to check:
+3. **Accessibility Audit**: Use the `frontend-plugin:responsive-design-expert` agent to check:
    - ARIA attributes usage
    - Keyboard navigation support
    - Focus management
@@ -35,7 +35,7 @@ Follow these steps:
    - Semantic HTML usage
    - Screen reader compatibility
 
-4. **Styling Audit**: Use the `css-tailwind-expert` agent to review:
+4. **Styling Audit**: Use the `frontend-plugin:css-tailwind-expert` agent to review:
    - CSS/Tailwind consistency
    - Design system adherence
    - Redundant or duplicate styles

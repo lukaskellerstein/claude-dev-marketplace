@@ -15,7 +15,7 @@ Follow these steps:
    - Check for secrets in code and git history
    - Map cloud resources if applicable
 
-2. **Launch Vulnerability Scanner**: Use the `vulnerability-scanner` agent to:
+2. **Launch Vulnerability Scanner**: Use the `security-plugin:vulnerability-scanner` agent to:
    - Run dependency vulnerability scans
    - Detect hardcoded secrets and credentials
    - Scan container images for vulnerabilities
@@ -447,6 +447,6 @@ including dependencies, secrets, and configuration
 - Run `/scan-vulnerabilities` regularly (daily/weekly)
 - Follow with `/fix-vulnerability` for specific CVEs
 - Combine with `/security-audit` for comprehensive assessment
-- Use `vulnerability-scanner` agent for deep analysis
+- Use `security-plugin:vulnerability-scanner` agent for deep analysis
 
 Provide actionable vulnerability scan reports with clear remediation steps, severity-based prioritization, and automated fixes where possible.

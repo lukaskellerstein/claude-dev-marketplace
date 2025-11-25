@@ -17,7 +17,7 @@ Follow these steps:
    - Scale requirements (concurrent workflows)
    - Review existing codebase if applicable
 
-2. **Design Workflow**: Use the `workflow-automation-expert` agent to:
+2. **Design Workflow**: Use the `aiagent-plugin:workflow-automation-expert` agent to:
    - Model workflow as state machine
    - Break down into activities
    - Design retry and timeout policies
@@ -27,9 +27,9 @@ Follow these steps:
    - Consider versioning strategy
 
 3. **AI Agent Integration** (if needed): If workflow includes AI agents, use:
-   - `claude-agent-expert` for Claude-powered activities
-   - `langchain-expert` for complex agent chains in activities
-   - `agent-orchestration-expert` for multi-agent coordination
+   - `aiagent-plugin:claude-agent-expert` for Claude-powered activities
+   - `aiagent-plugin:langchain-expert` for complex agent chains in activities
+   - `aiagent-plugin:agent-orchestration-expert` for multi-agent coordination
 
 4. **Implementation Guide**: Provide:
    - Complete Temporal workflow code

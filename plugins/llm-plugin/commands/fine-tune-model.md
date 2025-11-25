@@ -16,7 +16,7 @@ Follow these steps:
    - Timeline constraints
    - Review existing codebase if applicable
 
-2. **Launch Fine-tuning Expert**: Use the `llm-finetuning-expert` agent to:
+2. **Launch Fine-tuning Expert**: Use the `llm-plugin:llm-finetuning-expert` agent to:
    - Select appropriate base model
    - Choose fine-tuning method (LoRA, QLoRA, full fine-tuning)
    - Configure PEFT parameters
@@ -25,7 +25,7 @@ Follow these steps:
    - Configure evaluation strategy
    - Plan inference and deployment
 
-3. **Optimize if Needed**: If optimization is required, use the `model-optimization-expert` agent to:
+3. **Optimize if Needed**: If optimization is required, use the `llm-plugin:model-optimization-expert` agent to:
    - Optimize memory usage with quantization
    - Speed up training with Unsloth
    - Optimize inference performance

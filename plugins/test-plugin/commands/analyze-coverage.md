@@ -22,7 +22,7 @@ Follow these steps:
    - Create visual coverage reports (HTML)
    - Export coverage data for analysis
 
-3. **Launch Coverage Analyzer**: Use the `coverage-analyzer` agent to:
+3. **Launch Coverage Analyzer**: Use the `test-plugin:coverage-analyzer` agent to:
    - Parse coverage data and identify patterns
    - Find completely uncovered files
    - Identify functions with low/no coverage

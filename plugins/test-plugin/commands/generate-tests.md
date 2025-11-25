@@ -24,7 +24,7 @@ Follow these steps:
    - Critical business logic
    - Security-sensitive code paths
 
-3. **Launch Test Generator**: Use the `test-generator` agent to:
+3. **Launch Test Generator**: Use the `test-plugin:test-generator` agent to:
    - Generate unit tests for individual functions/methods
    - Create integration tests for component interactions
    - Generate test fixtures and factories for test data

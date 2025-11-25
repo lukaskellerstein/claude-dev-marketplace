@@ -14,7 +14,7 @@ Follow these steps:
    - Find inconsistencies in spacing, colors, typography
    - Understand project requirements (frameworks, libraries)
 
-2. **Define Design Tokens**: Use the `css-tailwind-expert` agent to:
+2. **Define Design Tokens**: Use the `frontend-plugin:css-tailwind-expert` agent to:
    - Create color system (primary, secondary, semantic colors)
    - Define typography scale (font families, sizes, weights, line heights)
    - Establish spacing scale (4pt or 8pt grid system)
@@ -29,13 +29,13 @@ Follow these steps:
    - Set up dark mode strategy
    - Configure JIT mode
 
-4. **Build Component Library**: Use the `react-expert` agent to create:
+4. **Build Component Library**: Use the `frontend-plugin:react-expert` agent to create:
    - Primitive components (Button, Input, Card, Badge, etc.)
    - Composite components (Form, Modal, Dropdown, etc.)
    - Layout components (Container, Grid, Stack, etc.)
    - Integrate shadcn-ui components where applicable
 
-5. **Ensure Consistency**: Use the `responsive-design-expert` agent to:
+5. **Ensure Consistency**: Use the `frontend-plugin:responsive-design-expert` agent to:
    - Verify responsive behavior across all components
    - Ensure consistent spacing and sizing
    - Validate accessibility standards

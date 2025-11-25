@@ -16,7 +16,7 @@ Follow these steps:
    - Budget constraints
    - Review existing codebase if applicable
 
-2. **Launch Training Expert**: Use the `llm-training-expert` agent to:
+2. **Launch Training Expert**: Use the `llm-plugin:llm-training-expert` agent to:
    - Design model architecture or select base architecture
    - Plan dataset preparation and preprocessing pipeline
    - Configure distributed training strategy (DDP, FSDP, DeepSpeed)
@@ -25,7 +25,7 @@ Follow these steps:
    - Plan evaluation strategy
    - Design troubleshooting approaches
 
-3. **Review and Optimize** (if needed): If optimization is required, use the `model-optimization-expert` agent to:
+3. **Review and Optimize** (if needed): If optimization is required, use the `llm-plugin:model-optimization-expert` agent to:
    - Profile training performance
    - Identify bottlenecks
    - Optimize memory usage

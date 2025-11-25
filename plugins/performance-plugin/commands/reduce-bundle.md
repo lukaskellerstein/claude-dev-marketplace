@@ -16,7 +16,7 @@ Follow these steps:
    - Check for unused code
    - Review source maps
 
-2. **Launch Frontend Optimizer**: Use `frontend-optimizer` agent to:
+2. **Launch Frontend Optimizer**: Use `performance-plugin:frontend-optimizer` agent to:
    - Analyze webpack/vite bundle
    - Identify large dependencies (> 50KB)
    - Find tree-shaking opportunities

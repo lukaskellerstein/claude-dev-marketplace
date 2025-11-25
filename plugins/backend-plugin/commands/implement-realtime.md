@@ -14,7 +14,7 @@ Follow these steps:
    - Assess scale (concurrent connections, messages per second)
    - Review existing infrastructure and client applications
 
-2. **Launch Real-time Communication Expert**: Use the `realtime-communication-expert` agent to:
+2. **Launch Real-time Communication Expert**: Use the `backend-plugin:realtime-communication-expert` agent to:
    - Choose technology (WebSocket, SSE, Long Polling)
    - Design protocol and message types
    - Plan authentication and authorization
@@ -22,7 +22,7 @@ Follow these steps:
    - Plan scaling strategy for multiple instances
    - Design monitoring and debugging approach
 
-3. **Message Broker Integration** (if needed): If integrating with message broker, use the `message-broker-expert` agent to:
+3. **Message Broker Integration** (if needed): If integrating with message broker, use the `backend-plugin:message-broker-expert` agent to:
    - Design message flow between broker and WebSocket
    - Setup pub/sub for cross-instance communication
    - Design message routing and filtering
